@@ -5,6 +5,7 @@ import type { FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 
+import { useAlerts } from '@/frontend/alerts/AlertsProvider'
 import { useAuth } from '@/frontend/auth/AuthProvider'
 import { useFarm } from '@/frontend/farm/FarmProvider'
 import { cn } from '@/shared/lib/cn'
@@ -176,6 +177,7 @@ function SidebarFooter({ onNavigate }: { onNavigate?: () => void }) {
 
 export function SidebarContent({ scope, onNavigate }: SidebarContentProps) {
   const { t } = useTranslation()
+  const { unacknowledgedCount } = useAlerts()
 
   return (
     <div className="flex h-full flex-col gap-6 p-4">
@@ -188,6 +190,7 @@ export function SidebarContent({ scope, onNavigate }: SidebarContentProps) {
       <nav className="flex flex-col gap-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
+          const showCount = item.to === '/app/alerts' && unacknowledgedCount > 0
           return (
             <NavLink
               key={item.to}
@@ -205,6 +208,11 @@ export function SidebarContent({ scope, onNavigate }: SidebarContentProps) {
             >
               <Icon size={16} strokeWidth={1.5} aria-hidden="true" />
               {t(item.label)}
+              {showCount ? (
+                <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-sharp bg-foreground px-1 font-mono text-[10px] text-background">
+                  {unacknowledgedCount}
+                </span>
+              ) : null}
             </NavLink>
           )
         })}

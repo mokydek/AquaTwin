@@ -55,12 +55,38 @@
         "title": "Settings",
         "description": "Farm and account settings"
       }
+    },
+    "status": {
+      "ok": "Normal",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "dashboard": {
+      "rangeLabel": "Time range",
+      "range1h": "1 h",
+      "range6h": "6 h",
+      "range24h": "24 h",
+      "rangeStats": "Min {{min}} · Avg {{avg}} · Max {{max}}",
+      "emptyHint": "No readings yet. Use Generate 24 h history to fill the charts."
+    },
+    "simulator": {
+      "running": "Simulation running",
+      "stopped": "Simulation stopped",
+      "start": "Start",
+      "stop": "Stop",
+      "generate": "Generate 24 h history",
+      "generating": "Generating",
+      "historyDone": "History generated",
+      "error": "The simulator hit an error and stopped",
+      "scenariosTitle": "Simulation scenarios",
+      "scenariosDescription": "Turning on a scenario makes that reading drift toward a critical level."
     }
   },
   "common": {
     "landing": "Landing",
     "auth": "Authentication",
-    "app": "Application"
+    "app": "Application",
+    "noData": "No data"
   },
   "sensors": {
     "ph": "pH",
@@ -177,6 +203,52 @@
     },
     "aria": {
       "tabs": "Authentication"
+    }
+  },
+  "alerts": {
+    "title": "Alerts",
+    "description": "Threshold breaches and forecasts for your farm",
+    "tabs": {
+      "active": "Active",
+      "history": "History"
+    },
+    "kind": {
+      "threshold": "Threshold",
+      "prediction": "Forecast"
+    },
+    "acknowledge": "Acknowledge",
+    "acknowledged": "Acknowledged",
+    "emptyActive": "All parameters are stable",
+    "emptyHistory": "No resolved alerts yet",
+    "message": {
+      "threshold": "Current value {{value}} {{unit}}",
+      "prediction": "Reaches critical in {{eta}}"
+    },
+    "etaHoursMinutes": "{{hours}} h {{minutes}} m",
+    "etaMinutes": "{{minutes}} m",
+    "kpiForecast": "Critical in {{eta}}",
+    "toast": {
+      "threshold": "{{sensor}} {{status}}: {{value}} {{unit}}",
+      "prediction": "Forecast: {{sensor}} reaches critical in {{eta}}"
+    },
+    "history": {
+      "time": "Time",
+      "sensor": "Sensor",
+      "type": "Type",
+      "severity": "Severity",
+      "peak": "Peak",
+      "duration": "Duration"
+    },
+    "recommendations": {
+      "generic": "Review this parameter and adjust the system.",
+      "ammonia_high": "Increase filtration and pause feeding until levels drop.",
+      "dissolved_oxygen_low": "Turn on the aerator and check the main pump.",
+      "ph_low": "Dose pH buffer gradually and retest.",
+      "ph_high": "Dose pH buffer gradually and retest.",
+      "water_temp_low": "Turn on the heater and reduce ventilation.",
+      "water_temp_high": "Add shading and increase ventilation.",
+      "nitrite_high": "Do a partial water exchange and check the biofilter.",
+      "nitrate_high": "Harvest greens or exchange part of the water."
     }
   }
 }

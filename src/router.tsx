@@ -7,7 +7,8 @@ import { ProtectedRoute } from '@/frontend/auth/ProtectedRoute'
 const LandingPage = lazy(() => import('@/landing/pages/LandingPage'))
 const AuthPage = lazy(() => import('@/frontend/pages/AuthPage'))
 const AppLayout = lazy(() => import('@/frontend/layout/AppLayout'))
-const OverviewPage = lazy(() => import('@/frontend/pages/OverviewPage'))
+const DashboardPage = lazy(() => import('@/frontend/pages/DashboardPage'))
+const AlertsPage = lazy(() => import('@/frontend/pages/AlertsPage'))
 const StubPage = lazy(() => import('@/frontend/pages/StubPage'))
 const UiKitPage = lazy(() => import('@/frontend/pages/UiKitPage'))
 const NotFound = lazy(() => import('@/shared/ui/NotFound'))
@@ -26,9 +27,9 @@ export const router = createBrowserRouter([
         path: '/app',
         element: suspended(<AppLayout />),
         children: [
-          { index: true, element: suspended(<OverviewPage />) },
+          { index: true, element: suspended(<DashboardPage />) },
           { path: 'twin', element: suspended(<StubPage section="twin" />) },
-          { path: 'alerts', element: suspended(<StubPage section="alerts" />) },
+          { path: 'alerts', element: suspended(<AlertsPage />) },
           { path: 'automation', element: suspended(<StubPage section="automation" />) },
           { path: 'settings', element: suspended(<StubPage section="settings" />) },
         ],

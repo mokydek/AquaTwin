@@ -3,9 +3,13 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Outlet } from 'react-router-dom'
 
+import { AlertEngineProvider } from '@/frontend/alerts/AlertEngineProvider'
+import { AlertsProvider } from '@/frontend/alerts/AlertsProvider'
+import { LiveReadingsProvider } from '@/frontend/data/LiveReadingsProvider'
 import { FarmProvider, useFarm } from '@/frontend/farm/FarmProvider'
 import { OnboardingScreen } from '@/frontend/farm/OnboardingScreen'
 import { SidebarContent } from '@/frontend/layout/SidebarContent'
+import { SimulatorProvider } from '@/frontend/simulator/SimulatorProvider'
 import { Skeleton, Wordmark } from '@/shared/ui'
 
 const iconButton =
@@ -91,19 +95,27 @@ function AppShell() {
   if (farms.length === 0) return <OnboardingScreen />
 
   return (
-    <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[232px] flex-col border-r border-border bg-background md:flex">
-        <SidebarContent scope="desktop" />
-      </aside>
+    <SimulatorProvider>
+      <LiveReadingsProvider>
+        <AlertEngineProvider>
+          <AlertsProvider>
+            <div className="min-h-screen bg-background">
+              <aside className="fixed inset-y-0 left-0 z-30 hidden w-[232px] flex-col border-r border-border bg-background md:flex">
+                <SidebarContent scope="desktop" />
+              </aside>
 
-      <MobileBar />
+              <MobileBar />
 
-      <main className="md:pl-[232px]">
-        <div className="mx-auto max-w-[1120px] p-6 md:p-8">
-          <Outlet />
-        </div>
-      </main>
-    </div>
+              <main className="md:pl-[232px]">
+                <div className="mx-auto max-w-[1120px] p-6 md:p-8">
+                  <Outlet />
+                </div>
+              </main>
+            </div>
+          </AlertsProvider>
+        </AlertEngineProvider>
+      </LiveReadingsProvider>
+    </SimulatorProvider>
   )
 }
 

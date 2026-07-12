@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "check:db": "node --env-file=.env scripts/check-db.mjs"
+    "check:db": "node --env-file=.env scripts/check-db.mjs",
+    "check:trend": "npx --yes tsx scripts/check-trend.ts"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.2.8",

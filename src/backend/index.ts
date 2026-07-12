@@ -6,6 +6,18 @@ export { createFarmWithDefaults, getFarm, listFarms } from '@/backend/farms'
 export { listSensors } from '@/backend/sensors'
 export { listDevices, setDeviceState } from '@/backend/devices'
 export type { SetDeviceResult } from '@/backend/devices'
+export { getReadings, insertReadings, subscribeToReadings } from '@/backend/readings'
+export type { ReadingRow } from '@/backend/readings'
+export {
+  acknowledgeAlert,
+  createAlert,
+  listActiveAlerts,
+  listResolvedAlerts,
+  resolveAlerts,
+  subscribeToAlerts,
+  updateAlertEta,
+} from '@/backend/alerts'
+export type { AlertChange } from '@/backend/alerts'
 export {
   getSession,
   signInWithPassword,

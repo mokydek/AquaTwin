@@ -38,6 +38,28 @@ export type SensorConfig = {
   thresholds: Thresholds
 }
 
+export type SensorDirection = 'high' | 'low'
+
+// Sensor + direction combinations that have specific aquaponics advice. Anything
+// else falls back to a generic recommendation.
+const RECOMMENDATION_CASES = new Set<string>([
+  'ammonia_high',
+  'dissolved_oxygen_low',
+  'ph_low',
+  'ph_high',
+  'water_temp_low',
+  'water_temp_high',
+  'nitrite_high',
+  'nitrate_high',
+])
+
+export function recommendationKey(type: SensorType, direction: SensorDirection): string {
+  const key = `${type}_${direction}`
+  return RECOMMENDATION_CASES.has(key)
+    ? `alerts.recommendations.${key}`
+    : 'alerts.recommendations.generic'
+}
+
 export const SENSOR_TYPES: Record<SensorType, SensorConfig> = {
   ph: {
     unit: 'pH',
