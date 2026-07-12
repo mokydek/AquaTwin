@@ -38,6 +38,30 @@ export type SensorConfig = {
   thresholds: Thresholds
 }
 
+// Automation tuning. The deadband (in each sensor's own units) is the hysteresis
+// margin a value must cross back past a threshold before a fired rule re-arms.
+// The cooldown is a wall clock window during which a rule that acted stays quiet.
+export const SENSOR_DEADBAND: Record<SensorType, number> = {
+  ph: 0.1,
+  water_temp: 0.5,
+  dissolved_oxygen: 0.3,
+  ammonia: 0.05,
+  nitrite: 0.05,
+  nitrate: 5,
+}
+
+export const AUTOMATION_COOLDOWN_MS = 60_000
+
+// Sane threshold input range per sensor for the rule editor and validation.
+export const SENSOR_INPUT_RANGE: Record<SensorType, { min: number; max: number; step: number }> = {
+  ph: { min: 0, max: 14, step: 0.1 },
+  water_temp: { min: 0, max: 45, step: 0.5 },
+  dissolved_oxygen: { min: 0, max: 20, step: 0.1 },
+  ammonia: { min: 0, max: 5, step: 0.05 },
+  nitrite: { min: 0, max: 5, step: 0.05 },
+  nitrate: { min: 0, max: 500, step: 1 },
+}
+
 export type SensorDirection = 'high' | 'low'
 
 // Sensor + direction combinations that have specific aquaponics advice. Anything

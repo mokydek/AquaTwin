@@ -250,5 +250,118 @@
       "nitrite_high": "Do a partial water exchange and check the biofilter.",
       "nitrate_high": "Harvest greens or exchange part of the water."
     }
+  },
+  "twin": {
+    "description": "A live mirror of your farm and a what if sandbox",
+    "tabs": {
+      "schematic": "Live schematic",
+      "whatif": "What if"
+    },
+    "nodes": {
+      "fish_tank": "Fish tank",
+      "biofilter": "Biofilter",
+      "grow_beds": "Grow beds",
+      "sump": "Sump",
+      "pump": "Pump"
+    },
+    "details": "Details",
+    "selectHint": "Select a node to see its details",
+    "noSensors": "No sensors on this node",
+    "controls": {
+      "title": "Scenario",
+      "horizon": "Horizon",
+      "waterTempDelta": "Water temperature change",
+      "fishLoad": "Fish load",
+      "feedRate": "Feed rate",
+      "plantMass": "Plant mass",
+      "aeration": "Aeration level",
+      "filtration": "Filtration level",
+      "baseline": "Starting values",
+      "run": "Run simulation",
+      "running": "Running",
+      "reset": "Reset to defaults"
+    },
+    "disclaimer": "This is a projection on the twin. It changes nothing on the real farm.",
+    "horizonOption": "{{days}} days",
+    "presets": {
+      "heatwave": "Heat wave",
+      "overfeeding": "Overfeeding"
+    },
+    "runHint": "Adjust the controls and run a projection",
+    "overallLabel": "Overall outlook",
+    "verdict": {
+      "stable": "Stable",
+      "at_risk": "At risk",
+      "critical": "Critical"
+    },
+    "entersWarning": "Enters warning on day {{day}}",
+    "entersCritical": "Enters critical on day {{day}}",
+    "allStable": "The system stays within safe ranges for the whole horizon"
+  },
+  "automation": {
+    "title": "Automation",
+    "description": "Rules that switch your devices automatically",
+    "newRule": "New rule",
+    "editRule": "Edit rule",
+    "emptyTitle": "No rules yet",
+    "emptyBody": "Create a rule or start from a suggested one",
+    "eventLog": "Event log",
+    "noEvents": "No device actions yet",
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Low oxygen response",
+      "sensor": "Sensor",
+      "condition": "Condition",
+      "threshold": "Threshold",
+      "device": "Device",
+      "action": "Action",
+      "enabled": "Enabled"
+    },
+    "condition": {
+      "above": "Above",
+      "below": "Below"
+    },
+    "action": {
+      "turnOn": "Turn on",
+      "turnOff": "Turn off"
+    },
+    "summary": {
+      "above": "When {{sensor}} rises above {{threshold}} {{unit}}",
+      "below": "When {{sensor}} drops below {{threshold}} {{unit}}",
+      "turnOn": "turn on the {{device}}",
+      "turnOff": "turn off the {{device}}",
+      "template": "{{condition}}, {{action}}"
+    },
+    "errors": {
+      "name": "Enter a rule name",
+      "threshold": "Enter a value between {{min}} and {{max}}"
+    },
+    "save": "Save",
+    "cancel": "Cancel",
+    "saved": "Rule saved",
+    "saveFailed": "Something went wrong. Please try again",
+    "deleted": "Rule deleted",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteTitle": "Delete rule",
+    "deleteBody": "The rule {{name}} will be removed. This cannot be undone.",
+    "presets": {
+      "lowOxygen": "Low oxygen aerator",
+      "lowOxygenName": "Low oxygen response",
+      "lowTemp": "Cold water heater",
+      "lowTempName": "Cold water response"
+    },
+    "event": {
+      "time": "Time",
+      "device": "Device",
+      "action": "Action",
+      "source": "Source"
+    },
+    "manual": "Manual",
+    "ruleFallback": "Rule",
+    "toast": {
+      "turnedOn": "Automation: {{device}} turned on by rule {{rule}}",
+      "turnedOff": "Automation: {{device}} turned off by rule {{rule}}"
+    }
   }
 }

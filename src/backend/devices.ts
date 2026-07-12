@@ -1,6 +1,6 @@
 import { supabase } from '@/backend/client'
 import { BackendError } from '@/backend/errors'
-import type { Device, DeviceType } from '@/backend/types'
+import type { Device, DeviceType, TriggeredBy } from '@/backend/types'
 
 export type SetDeviceResult = { ok: true } | { ok: false }
 
@@ -14,13 +14,17 @@ export async function listDevices(farmId: string): Promise<Device[]> {
   return data
 }
 
-// Flips a device on or off and records the manual action in automation_events.
-// Returns a discriminated result; expected failures are values, not throws.
+// Flips a device on or off and records the action in automation_events. The
+// manual path defaults triggeredBy to "manual"; the rule engine passes "rule"
+// and the rule id so both paths log consistently. Returns a discriminated
+// result; expected failures are values, not throws.
 export async function setDeviceState(
   deviceId: string,
   farmId: string,
   deviceType: DeviceType,
   isOn: boolean,
+  triggeredBy: TriggeredBy = 'manual',
+  ruleId: string | null = null,
 ): Promise<SetDeviceResult> {
   try {
     const { error: updateError } = await supabase
@@ -33,13 +37,32 @@ export async function setDeviceState(
       farm_id: farmId,
       device_type: deviceType,
       action: isOn ? 'turn_on' : 'turn_off',
-      triggered_by: 'manual',
-      rule_id: null,
+      triggered_by: triggeredBy,
+      rule_id: ruleId,
     })
     if (eventError) return { ok: false }
 
     return { ok: true }
   } catch {
     return { ok: false }
+  }
+}
+
+let channelSeq = 0
+
+export function subscribeToDevices(
+  farmId: string,
+  onChange: (device: Device) => void,
+): () => void {
+  channelSeq += 1
+  const channel = supabase.channel(`devices-${channelSeq}`)
+  channel.on(
+    'postgres_changes',
+    { event: 'UPDATE', schema: 'public', table: 'devices', filter: `farm_id=eq.${farmId}` },
+    (payload) => onChange(payload.new as Device),
+  )
+  channel.subscribe()
+  return () => {
+    void supabase.removeChannel(channel)
   }
 }

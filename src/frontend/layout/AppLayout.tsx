@@ -5,6 +5,7 @@ import { Link, Outlet } from 'react-router-dom'
 
 import { AlertEngineProvider } from '@/frontend/alerts/AlertEngineProvider'
 import { AlertsProvider } from '@/frontend/alerts/AlertsProvider'
+import { RuleEngineProvider } from '@/frontend/automation/RuleEngineProvider'
 import { LiveReadingsProvider } from '@/frontend/data/LiveReadingsProvider'
 import { FarmProvider, useFarm } from '@/frontend/farm/FarmProvider'
 import { OnboardingScreen } from '@/frontend/farm/OnboardingScreen'
@@ -99,6 +100,7 @@ function AppShell() {
       <LiveReadingsProvider>
         <AlertEngineProvider>
           <AlertsProvider>
+            <RuleEngineProvider>
             <div className="min-h-screen bg-background">
               <aside className="fixed inset-y-0 left-0 z-30 hidden w-[232px] flex-col border-r border-border bg-background md:flex">
                 <SidebarContent scope="desktop" />
@@ -112,6 +114,7 @@ function AppShell() {
                 </div>
               </main>
             </div>
+            </RuleEngineProvider>
           </AlertsProvider>
         </AlertEngineProvider>
       </LiveReadingsProvider>

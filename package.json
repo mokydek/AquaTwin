@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "check:db": "node --env-file=.env scripts/check-db.mjs",
-    "check:trend": "npx --yes tsx scripts/check-trend.ts"
+    "check:trend": "npx --yes tsx scripts/check-trend.ts",
+    "check:model": "npx --yes tsx scripts/check-model.ts"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.2.8",

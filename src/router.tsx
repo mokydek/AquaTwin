@@ -9,6 +9,8 @@ const AuthPage = lazy(() => import('@/frontend/pages/AuthPage'))
 const AppLayout = lazy(() => import('@/frontend/layout/AppLayout'))
 const DashboardPage = lazy(() => import('@/frontend/pages/DashboardPage'))
 const AlertsPage = lazy(() => import('@/frontend/pages/AlertsPage'))
+const TwinPage = lazy(() => import('@/frontend/pages/TwinPage'))
+const AutomationPage = lazy(() => import('@/frontend/pages/AutomationPage'))
 const StubPage = lazy(() => import('@/frontend/pages/StubPage'))
 const UiKitPage = lazy(() => import('@/frontend/pages/UiKitPage'))
 const NotFound = lazy(() => import('@/shared/ui/NotFound'))
@@ -28,9 +30,9 @@ export const router = createBrowserRouter([
         element: suspended(<AppLayout />),
         children: [
           { index: true, element: suspended(<DashboardPage />) },
-          { path: 'twin', element: suspended(<StubPage section="twin" />) },
+          { path: 'twin', element: suspended(<TwinPage />) },
           { path: 'alerts', element: suspended(<AlertsPage />) },
-          { path: 'automation', element: suspended(<StubPage section="automation" />) },
+          { path: 'automation', element: suspended(<AutomationPage />) },
           { path: 'settings', element: suspended(<StubPage section="settings" />) },
         ],
       },

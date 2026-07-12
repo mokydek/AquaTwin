@@ -4,8 +4,18 @@ export * from '@/backend/types'
 export { BackendError } from '@/backend/errors'
 export { createFarmWithDefaults, getFarm, listFarms } from '@/backend/farms'
 export { listSensors } from '@/backend/sensors'
-export { listDevices, setDeviceState } from '@/backend/devices'
+export { listDevices, setDeviceState, subscribeToDevices } from '@/backend/devices'
 export type { SetDeviceResult } from '@/backend/devices'
+export {
+  createRule,
+  deleteRule,
+  listAutomationEvents,
+  listRules,
+  setRuleEnabled,
+  subscribeToAutomationEvents,
+  updateRule,
+} from '@/backend/automation'
+export type { AutomationEventInsert, AutomationEventRow } from '@/backend/automation'
 export { getReadings, insertReadings, subscribeToReadings } from '@/backend/readings'
 export type { ReadingRow } from '@/backend/readings'
 export {
