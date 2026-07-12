@@ -5,7 +5,6 @@ import { createAlert, listActiveAlerts, resolveAlerts, updateAlertEta } from '@/
 import { useFarm } from '@/frontend/farm/FarmProvider'
 import { useLiveReadings } from '@/frontend/data/LiveReadingsProvider'
 import type { SensorType, Thresholds } from '@/shared/config/aquaponics'
-import { SENSOR_TYPES } from '@/shared/config/aquaponics'
 import { computeStatus } from '@/shared/lib/status'
 import type { Status } from '@/shared/lib/status'
 import type { LineChartPoint } from '@/shared/ui'
@@ -50,7 +49,7 @@ function crossedBound(value: number, thresholds: Thresholds, severity: Status): 
 
 export function AlertEngineProvider({ children }: { children: ReactNode }) {
   const { activeFarmId } = useFarm()
-  const { latest, bySensorType, sensors } = useLiveReadings()
+  const { latest, bySensorType, sensors, getThresholds } = useLiveReadings()
 
   const lastStatusRef = useRef<Map<SensorType, Status>>(new Map())
   const managedRef = useRef<Map<string, string>>(new Map())
@@ -90,10 +89,7 @@ export function AlertEngineProvider({ children }: { children: ReactNode }) {
       for (const sensor of sensors) {
         const value = latest.get(sensor.type)
         if (value === undefined) continue
-        lastStatusRef.current.set(
-          sensor.type,
-          computeStatus(value, SENSOR_TYPES[sensor.type].thresholds),
-        )
+        lastStatusRef.current.set(sensor.type, computeStatus(value, getThresholds(sensor.type)))
       }
       initializedRef.current = true
       return
@@ -102,7 +98,7 @@ export function AlertEngineProvider({ children }: { children: ReactNode }) {
     for (const sensor of sensors) {
       const value = latest.get(sensor.type)
       if (value === undefined) continue
-      const thresholds = SENSOR_TYPES[sensor.type].thresholds
+      const thresholds = getThresholds(sensor.type)
       const status = computeStatus(value, thresholds)
       const previous = lastStatusRef.current.get(sensor.type) ?? 'ok'
       if (status === previous) continue
@@ -130,7 +126,7 @@ export function AlertEngineProvider({ children }: { children: ReactNode }) {
         .then((alert) => managedRef.current.set(key, alert.id))
         .catch(() => managedRef.current.delete(key))
     }
-  }, [latest, sensors, activeFarmId])
+  }, [latest, sensors, activeFarmId, getThresholds])
 
   // Prediction alerts: evaluate trends on a fixed cadence.
   useEffect(() => {
@@ -155,7 +151,7 @@ export function AlertEngineProvider({ children }: { children: ReactNode }) {
           continue
         }
 
-        const thresholds = SENSOR_TYPES[sensor.type].thresholds
+        const thresholds = getThresholds(sensor.type)
         const current = points[points.length - 1].value
         const eta = predictThresholdEta(current, slopePerMinute, {
           warnLow: null,

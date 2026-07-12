@@ -8,6 +8,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAlerts } from '@/frontend/alerts/AlertsProvider'
 import { useAuth } from '@/frontend/auth/AuthProvider'
 import { useFarm } from '@/frontend/farm/FarmProvider'
+import { ConnectionBadge } from '@/frontend/system/ConnectionProvider'
 import { cn } from '@/shared/lib/cn'
 import {
   Button,
@@ -181,9 +182,12 @@ export function SidebarContent({ scope, onNavigate }: SidebarContentProps) {
 
   return (
     <div className="flex h-full flex-col gap-6 p-4">
-      <Link to="/app" onClick={onNavigate}>
-        <Wordmark size="sm" />
-      </Link>
+      <div className="flex items-center justify-between gap-2">
+        <Link to="/app" onClick={onNavigate}>
+          <Wordmark size="sm" />
+        </Link>
+        <ConnectionBadge />
+      </div>
 
       <FarmBlock scope={scope} />
 

@@ -10,14 +10,17 @@ import '@/shared/i18n'
 
 import { router } from '@/router'
 import { AuthProvider } from '@/frontend/auth/AuthProvider'
+import { ErrorBoundary } from '@/frontend/system/ErrorBoundary'
 import { ToastProvider } from '@/shared/ui/Toast'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ToastProvider>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
-    </ToastProvider>
+    <ErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

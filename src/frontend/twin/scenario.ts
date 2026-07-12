@@ -1,5 +1,5 @@
-import { SENSOR_TYPES, SENSOR_TYPE_LIST } from '@/shared/config/aquaponics'
-import type { SensorType } from '@/shared/config/aquaponics'
+import { SENSOR_TYPE_LIST } from '@/shared/config/aquaponics'
+import type { SensorType, Thresholds } from '@/shared/config/aquaponics'
 import { computeStatus } from '@/shared/lib/status'
 import type { Status } from '@/shared/lib/status'
 import { defaultParams, simulate } from '@/frontend/twin/model'
@@ -59,8 +59,11 @@ function worstVerdict(verdicts: Verdict[]): Verdict {
   return 'stable'
 }
 
-function analyzeSensor(type: SensorType, series: SeriesPoint[]): SensorAnalysis {
-  const thresholds = SENSOR_TYPES[type].thresholds
+function analyzeSensor(
+  type: SensorType,
+  series: SeriesPoint[],
+  thresholds: Thresholds,
+): SensorAnalysis {
   let warningDay: number | null = null
   let criticalDay: number | null = null
   let extreme = series.length > 0 ? series[0][type] : 0
@@ -89,7 +92,11 @@ function analyzeSensor(type: SensorType, series: SeriesPoint[]): SensorAnalysis 
 
 // Builds params from the scenario, projects the twin forward, and analyzes the
 // series against the config thresholds. Pure: nothing is written anywhere.
-export function runScenario(currentState: WaterState, scenario: Scenario): ScenarioResult {
+export function runScenario(
+  currentState: WaterState,
+  scenario: Scenario,
+  getThresholds: (type: SensorType) => Thresholds,
+): ScenarioResult {
   const base = defaultParams()
   const params: ModelParams = {
     fishLoad: base.fishLoad * scenario.fishLoad,
@@ -101,7 +108,7 @@ export function runScenario(currentState: WaterState, scenario: Scenario): Scena
   }
 
   const series = simulate(currentState, params, scenario.horizonDays)
-  const analysis = SENSOR_TYPE_LIST.map((type) => analyzeSensor(type, series))
+  const analysis = SENSOR_TYPE_LIST.map((type) => analyzeSensor(type, series, getThresholds(type)))
   const overall = worstVerdict(analysis.map((item) => item.verdict))
   return { series, analysis, overall }
 }

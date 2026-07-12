@@ -102,3 +102,13 @@ export function subscribeToAuth(callback: (session: Session | null) => void): ()
   })
   return () => data.subscription.unsubscribe()
 }
+
+export async function updatePassword(newPassword: string): Promise<AuthResult> {
+  try {
+    const { data, error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) return { ok: false, code: toAuthErrorCode(error) }
+    return { ok: true, session: null, user: data.user }
+  } catch (error) {
+    return { ok: false, code: toAuthErrorCode(error) }
+  }
+}

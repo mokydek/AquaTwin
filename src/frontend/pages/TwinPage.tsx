@@ -14,8 +14,9 @@ import type { WaterState } from '@/frontend/twin/model'
 import { defaultScenario, runScenario } from '@/frontend/twin/scenario'
 import type { Scenario, ScenarioResult, Verdict } from '@/frontend/twin/scenario'
 import { SENSOR_TYPES, SENSOR_TYPE_LIST } from '@/shared/config/aquaponics'
-import type { SensorType } from '@/shared/config/aquaponics'
+import type { SensorType, Thresholds } from '@/shared/config/aquaponics'
 import { computeStatus, statusToBadgeVariant } from '@/shared/lib/status'
+import { usePageTitle } from '@/shared/lib/usePageTitle'
 import type { Status } from '@/shared/lib/status'
 import {
   Badge,
@@ -108,8 +109,9 @@ function RangeControl({
 
 export default function TwinPage() {
   const { t } = useTranslation()
+  usePageTitle(`${t('app.nav.twin')} · ${t('app.name')}`)
   const { activeFarmId } = useFarm()
-  const { latest } = useLiveReadings()
+  const { latest, getThresholds } = useLiveReadings()
   const { toast } = useToast()
 
   const [tab, setTab] = useState<TabKey>('schematic')
@@ -163,7 +165,7 @@ export default function TwinPage() {
     const startState = buildCurrentState(latest)
     const snapshot = scenario
     window.setTimeout(() => {
-      setResult(runScenario(startState, snapshot))
+      setResult(runScenario(startState, snapshot, getThresholds))
       setRunning(false)
     }, 60)
   }
@@ -221,7 +223,7 @@ export default function TwinPage() {
                   {NODE_SENSORS[selected].map((type) => {
                     const config = SENSOR_TYPES[type]
                     const value = latest.get(type)
-                    const status = value !== undefined ? computeStatus(value, config.thresholds) : null
+                    const status = value !== undefined ? computeStatus(value, getThresholds(type)) : null
                     return (
                       <div key={type} className="flex items-start justify-between gap-2">
                         <Stat
@@ -417,7 +419,7 @@ export default function TwinPage() {
                   </CardContent>
                 </Card>
 
-                <TwinCharts result={result} />
+                <TwinCharts result={result} getThresholds={getThresholds} />
               </>
             )}
           </div>
@@ -427,7 +429,13 @@ export default function TwinPage() {
   )
 }
 
-function TwinCharts({ result }: { result: ScenarioResult }) {
+function TwinCharts({
+  result,
+  getThresholds,
+}: {
+  result: ScenarioResult
+  getThresholds: (type: SensorType) => Thresholds
+}) {
   const { t } = useTranslation()
   const lastDay = result.series.at(-1)?.day ?? 1
   const windowMs = Math.max(1, lastDay) * DAY_MS
@@ -457,7 +465,7 @@ function TwinCharts({ result }: { result: ScenarioResult }) {
             <CardContent>
               <LineChart
                 points={points}
-                thresholds={config.thresholds}
+                thresholds={getThresholds(type)}
                 unit={config.unit}
                 decimals={config.decimals}
                 timeWindowMs={windowMs}

@@ -3,6 +3,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Thresholds } from '@/shared/config/aquaponics'
+import { computeStatus } from '@/shared/lib/status'
 
 export type LineChartPoint = {
   t: number
@@ -131,12 +132,22 @@ export function LineChart({
     ? Math.min(Math.max(xScale(hovered.t) + 6, PAD.left), width - PAD.right - tooltipWidth)
     : 0
 
+  const latestValue = last.value
+  const latestStatus = computeStatus(latestValue, thresholds)
+  const ariaLabel = t('system.chartSummary', {
+    value: latestValue.toFixed(decimals),
+    unit,
+    status: t(`app.status.${latestStatus}`),
+  })
+
   return (
     <div ref={wrapperRef} style={{ height }} className="w-full">
       <svg
         ref={svgRef}
         width={width}
         height={height}
+        role="img"
+        aria-label={ariaLabel}
         className="block touch-none select-none"
         onPointerMove={handleMove}
         onPointerLeave={() => setHoverIndex(null)}

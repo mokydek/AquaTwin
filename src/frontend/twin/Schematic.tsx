@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { Device } from '@/backend'
 import { useLiveReadings } from '@/frontend/data/LiveReadingsProvider'
-import type { SensorType } from '@/shared/config/aquaponics'
+import type { SensorType, Thresholds } from '@/shared/config/aquaponics'
 import { SENSOR_TYPES } from '@/shared/config/aquaponics'
 import { computeStatus } from '@/shared/lib/status'
 import type { Status } from '@/shared/lib/status'
@@ -43,12 +43,16 @@ function rank(status: Status): number {
   return status === 'critical' ? 2 : status === 'warning' ? 1 : 0
 }
 
-function worstStatus(types: SensorType[], latest: Map<SensorType, number>): NodeStatus {
+function worstStatus(
+  types: SensorType[],
+  latest: Map<SensorType, number>,
+  getThresholds: (type: SensorType) => Thresholds,
+): NodeStatus {
   let worst: Status | null = null
   for (const type of types) {
     const value = latest.get(type)
     if (value === undefined) continue
-    const status = computeStatus(value, SENSOR_TYPES[type].thresholds)
+    const status = computeStatus(value, getThresholds(type))
     if (worst === null || rank(status) > rank(worst)) worst = status
   }
   return worst ?? 'neutral'
@@ -74,7 +78,7 @@ export type SchematicProps = {
 
 export function Schematic({ devices, selected, onSelect }: SchematicProps) {
   const { t } = useTranslation()
-  const { latest } = useLiveReadings()
+  const { latest, getThresholds } = useLiveReadings()
   const arrowId = useId()
 
   const pump = devices.find((device) => device.type === 'main_pump')
@@ -83,7 +87,7 @@ export function Schematic({ devices, selected, onSelect }: SchematicProps) {
   function statusFor(node: NodeDef): NodeStatus {
     if (node.id === 'pump') return pumpOn ? 'ok' : 'warning'
     if (node.id === 'sump') return 'neutral'
-    return worstStatus(node.statusSensors, latest)
+    return worstStatus(node.statusSensors, latest, getThresholds)
   }
 
   function valueFor(node: NodeDef): string | null {

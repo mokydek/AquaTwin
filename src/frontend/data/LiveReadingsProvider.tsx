@@ -5,7 +5,8 @@ import type { ReadingRow, Sensor } from '@/backend'
 import { getReadings, listSensors, subscribeToReadings } from '@/backend'
 import { useFarm } from '@/frontend/farm/FarmProvider'
 import { useSimulator } from '@/frontend/simulator/SimulatorProvider'
-import type { SensorType } from '@/shared/config/aquaponics'
+import type { SensorType, Thresholds } from '@/shared/config/aquaponics'
+import { SENSOR_TYPES } from '@/shared/config/aquaponics'
 import type { LineChartPoint } from '@/shared/ui'
 
 const LIVE_WINDOW_MS = 60 * 60 * 1000
@@ -14,6 +15,10 @@ type LiveReadingsValue = {
   bySensorType: Map<SensorType, LineChartPoint[]>
   latest: Map<SensorType, number>
   sensors: Sensor[]
+  // Thresholds come from the farm's own sensor rows (editable in Settings), with
+  // the config values as a fallback until the rows load.
+  getThresholds: (type: SensorType) => Thresholds
+  refreshSensors: () => Promise<void>
 }
 
 const LiveReadingsContext = createContext<LiveReadingsValue | null>(null)
@@ -58,6 +63,16 @@ export function LiveReadingsProvider({ children }: { children: ReactNode }) {
       })
     return () => {
       active = false
+    }
+  }, [activeFarmId])
+
+  const refreshSensors = useCallback(async () => {
+    if (!activeFarmId) return
+    try {
+      const list = await listSensors(activeFarmId)
+      setSensors(list)
+    } catch {
+      // Keep the current sensors if the refetch fails.
     }
   }, [activeFarmId])
 
@@ -109,6 +124,24 @@ export function LiveReadingsProvider({ children }: { children: ReactNode }) {
     return () => window.clearInterval(id)
   }, [])
 
+  const thresholdsByType = useMemo(() => {
+    const map = new Map<SensorType, Thresholds>()
+    for (const sensor of sensors) {
+      map.set(sensor.type, {
+        warnLow: sensor.warn_low,
+        warnHigh: sensor.warn_high,
+        critLow: sensor.crit_low,
+        critHigh: sensor.crit_high,
+      })
+    }
+    return map
+  }, [sensors])
+
+  const getThresholds = useCallback(
+    (type: SensorType): Thresholds => thresholdsByType.get(type) ?? SENSOR_TYPES[type].thresholds,
+    [thresholdsByType],
+  )
+
   const value = useMemo<LiveReadingsValue>(() => {
     const bySensorType = new Map<SensorType, LineChartPoint[]>()
     const latest = new Map<SensorType, number>()
@@ -117,8 +150,8 @@ export function LiveReadingsProvider({ children }: { children: ReactNode }) {
       bySensorType.set(sensor.type, arr)
       if (arr.length > 0) latest.set(sensor.type, arr[arr.length - 1].value)
     }
-    return { bySensorType, latest, sensors }
-  }, [pointsById, sensors])
+    return { bySensorType, latest, sensors, getThresholds, refreshSensors }
+  }, [pointsById, sensors, getThresholds, refreshSensors])
 
   return <LiveReadingsContext.Provider value={value}>{children}</LiveReadingsContext.Provider>
 }

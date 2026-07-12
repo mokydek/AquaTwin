@@ -67,4 +67,14 @@ input[type="range"].range-mono:focus-visible {
   .twin-pipe-flow {
     animation: none;
   }
+
+  /* Disable movement everywhere; keep state changes and visibility. */
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

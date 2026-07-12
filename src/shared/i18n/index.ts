@@ -33,6 +33,13 @@ void i18n.use(initReactI18next).init({
   interpolation: {
     escapeValue: false,
   },
+  saveMissing: import.meta.env.DEV,
+  missingKeyHandler: import.meta.env.DEV
+    ? (languages, _namespace, key) => {
+        const lng = Array.isArray(languages) ? languages.join(',') : languages
+        console.warn(`[i18n] missing key "${key}" for ${lng}`)
+      }
+    : undefined,
 })
 
 export default i18n

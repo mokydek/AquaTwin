@@ -2,8 +2,10 @@
 // directly (see CLAUDE.md architecture rules). The raw client stays internal.
 export * from '@/backend/types'
 export { BackendError } from '@/backend/errors'
-export { createFarmWithDefaults, getFarm, listFarms } from '@/backend/farms'
-export { listSensors } from '@/backend/sensors'
+export { createFarmWithDefaults, deleteFarm, getFarm, listFarms, renameFarm } from '@/backend/farms'
+export { listSensors, updateSensorThresholds, validThresholds } from '@/backend/sensors'
+export type { ThresholdPatch, ThresholdResult } from '@/backend/sensors'
+export { subscribeConnection } from '@/backend/connection'
 export { listDevices, setDeviceState, subscribeToDevices } from '@/backend/devices'
 export type { SetDeviceResult } from '@/backend/devices'
 export {
@@ -34,5 +36,6 @@ export {
   signOut,
   signUpWithPassword,
   subscribeToAuth,
+  updatePassword,
 } from '@/backend/auth'
 export type { AuthErrorCode, AuthResult, Session, SignOutResult, User } from '@/backend/auth'

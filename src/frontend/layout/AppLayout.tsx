@@ -11,6 +11,7 @@ import { FarmProvider, useFarm } from '@/frontend/farm/FarmProvider'
 import { OnboardingScreen } from '@/frontend/farm/OnboardingScreen'
 import { SidebarContent } from '@/frontend/layout/SidebarContent'
 import { SimulatorProvider } from '@/frontend/simulator/SimulatorProvider'
+import { ConnectionBadge, ConnectionProvider } from '@/frontend/system/ConnectionProvider'
 import { Skeleton, Wordmark } from '@/shared/ui'
 
 const iconButton =
@@ -26,14 +27,17 @@ function MobileBar() {
         <Link to="/app">
           <Wordmark size="sm" />
         </Link>
-        <button
-          type="button"
-          aria-label={t('app.nav.openMenu')}
-          onClick={() => setOpen(true)}
-          className={iconButton}
-        >
-          <Menu size={20} strokeWidth={1.5} />
-        </button>
+        <div className="flex items-center gap-3">
+          <ConnectionBadge />
+          <button
+            type="button"
+            aria-label={t('app.nav.openMenu')}
+            onClick={() => setOpen(true)}
+            className={iconButton}
+          >
+            <Menu size={20} strokeWidth={1.5} />
+          </button>
+        </div>
       </div>
 
       {open ? (
@@ -96,6 +100,7 @@ function AppShell() {
   if (farms.length === 0) return <OnboardingScreen />
 
   return (
+    <ConnectionProvider>
     <SimulatorProvider>
       <LiveReadingsProvider>
         <AlertEngineProvider>
@@ -119,6 +124,7 @@ function AppShell() {
         </AlertEngineProvider>
       </LiveReadingsProvider>
     </SimulatorProvider>
+    </ConnectionProvider>
   )
 }
 

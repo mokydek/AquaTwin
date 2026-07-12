@@ -22,6 +22,7 @@ import {
   SENSOR_TYPE_LIST,
 } from '@/shared/config/aquaponics'
 import type { DeviceType, SensorType } from '@/shared/config/aquaponics'
+import { usePageTitle } from '@/shared/lib/usePageTitle'
 import type { RuleAction, RuleCondition } from '@/backend'
 import {
   Badge,
@@ -108,6 +109,7 @@ function absoluteTime(iso: string, locale: string): string {
 
 export default function AutomationPage() {
   const { t, i18n } = useTranslation()
+  usePageTitle(`${t('automation.title')} · ${t('app.name')}`)
   const locale = i18n.resolvedLanguage ?? i18n.language
   const { activeFarmId } = useFarm()
   const { rules, refreshRules } = useRuleEngine()

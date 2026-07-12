@@ -21,6 +21,24 @@ export async function getFarm(id: string): Promise<Farm> {
   return data
 }
 
+export async function renameFarm(id: string, name: string): Promise<Farm> {
+  const { data, error } = await supabase
+    .from('farms')
+    .update({ name })
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw new BackendError(error.message, error.code)
+  return data
+}
+
+// Relies on ON DELETE CASCADE to remove the farm's sensors, devices, readings,
+// alerts, rules and events.
+export async function deleteFarm(id: string): Promise<void> {
+  const { error } = await supabase.from('farms').delete().eq('id', id)
+  if (error) throw new BackendError(error.message, error.code)
+}
+
 // Inserts the farm, then its six default sensors and six default devices.
 // owner_id is filled in by the database default (auth.uid()).
 export async function createFarmWithDefaults(name: string): Promise<Farm> {

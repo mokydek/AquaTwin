@@ -7,6 +7,7 @@ import { Link, Navigate } from 'react-router-dom'
 import type { AuthErrorCode } from '@/backend'
 import { signInWithPassword, signUpWithPassword } from '@/backend'
 import { useAuth } from '@/frontend/auth/AuthProvider'
+import { usePageTitle } from '@/shared/lib/usePageTitle'
 import { Button, FormField, Input, LanguageSwitcher, Tabs, Wordmark } from '@/shared/ui'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -199,6 +200,7 @@ function SignUpForm() {
 
 export default function AuthPage() {
   const { t } = useTranslation()
+  usePageTitle(`${t('common.auth')} · ${t('app.name')}`)
   const { user, loading } = useAuth()
   const [tab, setTab] = useState('sign-in')
 

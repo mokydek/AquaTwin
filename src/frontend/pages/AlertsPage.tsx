@@ -8,6 +8,7 @@ import { alertDirection, etaText } from '@/frontend/alerts/format'
 import { useAlerts } from '@/frontend/alerts/AlertsProvider'
 import { useFarm } from '@/frontend/farm/FarmProvider'
 import { cn } from '@/shared/lib/cn'
+import { usePageTitle } from '@/shared/lib/usePageTitle'
 import { statusToBadgeVariant } from '@/shared/lib/status'
 import { recommendationKey, SENSOR_TYPES } from '@/shared/config/aquaponics'
 import {
@@ -71,6 +72,7 @@ function formatDuration(
 
 export default function AlertsPage() {
   const { t, i18n } = useTranslation()
+  usePageTitle(`${t('alerts.title')} · ${t('app.name')}`)
   const locale = i18n.resolvedLanguage ?? i18n.language
   const { active, acknowledge } = useAlerts()
   const { activeFarmId } = useFarm()

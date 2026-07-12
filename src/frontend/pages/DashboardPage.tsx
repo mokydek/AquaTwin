@@ -10,6 +10,7 @@ import { useLiveReadings } from '@/frontend/data/LiveReadingsProvider'
 import { useFarm } from '@/frontend/farm/FarmProvider'
 import { useSimulator } from '@/frontend/simulator/SimulatorProvider'
 import { cn } from '@/shared/lib/cn'
+import { usePageTitle } from '@/shared/lib/usePageTitle'
 import { computeStatus, statusToBadgeVariant } from '@/shared/lib/status'
 import type { SensorType } from '@/shared/config/aquaponics'
 import { DEVICE_TYPE_LIST, SENSOR_TYPES, SENSOR_TYPE_LIST } from '@/shared/config/aquaponics'
@@ -45,9 +46,10 @@ function byOrder<T extends { type: string }>(items: T[], order: readonly string[
 
 export default function DashboardPage() {
   const { t } = useTranslation()
+  usePageTitle(`${t('app.nav.dashboard')} · ${t('app.name')}`)
   const { activeFarm, activeFarmId } = useFarm()
   const { toast } = useToast()
-  const { sensors, bySensorType, latest } = useLiveReadings()
+  const { sensors, bySensorType, latest, getThresholds } = useLiveReadings()
   const { active } = useAlerts()
   const {
     running,
@@ -239,7 +241,7 @@ export default function DashboardPage() {
                   </Card>
                 )
               }
-              const status = computeStatus(current, config.thresholds)
+              const status = computeStatus(current, getThresholds(sensor.type))
               const target = Date.now() - 60 * 60 * 1000
               let reference = series[0] ?? { t: 0, value: current }
               for (const point of series) {
@@ -298,7 +300,8 @@ export default function DashboardPage() {
               const series = points[sensor.id] ?? []
               const windowed = series.filter((point) => point.t >= Date.now() - windowMs)
               const current = latest.get(sensor.type) ?? series.at(-1)?.value ?? null
-              const status = current !== null ? computeStatus(current, config.thresholds) : null
+              const status =
+                current !== null ? computeStatus(current, getThresholds(sensor.type)) : null
               const values = windowed.map((point) => point.value)
               const stats =
                 values.length > 0
@@ -330,7 +333,7 @@ export default function DashboardPage() {
                   <CardContent>
                     <LineChart
                       points={windowed}
-                      thresholds={config.thresholds}
+                      thresholds={getThresholds(sensor.type)}
                       unit={config.unit}
                       decimals={config.decimals}
                       timeWindowMs={windowMs}

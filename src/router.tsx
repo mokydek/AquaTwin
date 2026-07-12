@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 
 import { ProtectedRoute } from '@/frontend/auth/ProtectedRoute'
+import { RouteFallback } from '@/frontend/system/RouteFallback'
 
 const LandingPage = lazy(() => import('@/landing/pages/LandingPage'))
 const AuthPage = lazy(() => import('@/frontend/pages/AuthPage'))
@@ -11,12 +12,12 @@ const DashboardPage = lazy(() => import('@/frontend/pages/DashboardPage'))
 const AlertsPage = lazy(() => import('@/frontend/pages/AlertsPage'))
 const TwinPage = lazy(() => import('@/frontend/pages/TwinPage'))
 const AutomationPage = lazy(() => import('@/frontend/pages/AutomationPage'))
-const StubPage = lazy(() => import('@/frontend/pages/StubPage'))
+const SettingsPage = lazy(() => import('@/frontend/pages/SettingsPage'))
 const UiKitPage = lazy(() => import('@/frontend/pages/UiKitPage'))
 const NotFound = lazy(() => import('@/shared/ui/NotFound'))
 
 function suspended(node: ReactNode) {
-  return <Suspense fallback={null}>{node}</Suspense>
+  return <Suspense fallback={<RouteFallback />}>{node}</Suspense>
 }
 
 export const router = createBrowserRouter([
@@ -33,7 +34,7 @@ export const router = createBrowserRouter([
           { path: 'twin', element: suspended(<TwinPage />) },
           { path: 'alerts', element: suspended(<AlertsPage />) },
           { path: 'automation', element: suspended(<AutomationPage />) },
-          { path: 'settings', element: suspended(<StubPage section="settings" />) },
+          { path: 'settings', element: suspended(<SettingsPage />) },
         ],
       },
     ],
