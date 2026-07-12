@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FFFFFF;
+  --color-foreground: #0A0A0A;
+  --color-muted: #666666;
+  --color-border: #EAEAEA;
+  --color-surface: #FAFAFA;
+  --font-sans: "Space Grotesk Variable", "Onest Variable", ui-sans-serif, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --radius-sharp: 2px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}

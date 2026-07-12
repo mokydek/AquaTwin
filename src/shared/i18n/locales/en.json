@@ -1,0 +1,182 @@
+{
+  "app": {
+    "name": "AquaTwin",
+    "tagline": "The digital twin for aquaponic farms",
+    "nav": {
+      "dashboard": "Dashboard",
+      "twin": "Digital twin",
+      "alerts": "Alerts",
+      "automation": "Automation",
+      "settings": "Settings",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
+    },
+    "farm": {
+      "newFarm": "New farm",
+      "newFarmTitle": "New farm",
+      "newFarmDescription": "The farm arrives with six sensors and six devices ready to go.",
+      "nameLabel": "Farm name",
+      "namePlaceholder": "North greenhouse",
+      "nameRequired": "Enter a farm name",
+      "create": "Create",
+      "creating": "Creating",
+      "cancel": "Cancel",
+      "created": "Farm created",
+      "createFailed": "Could not create the farm. Please try again",
+      "onboardingTitle": "Create your farm",
+      "onboardingDescription": "Your farm arrives with six sensors and six devices preconfigured and ready to monitor."
+    },
+    "overview": {
+      "description": "Farm overview",
+      "sensors": "Sensors",
+      "devices": "Devices",
+      "noData": "No data yet",
+      "on": "On",
+      "off": "Off",
+      "deviceUpdated": "Device updated",
+      "deviceFailed": "Could not update the device. Please try again"
+    },
+    "stub": {
+      "construction": "This section is under construction",
+      "constructionBody": "It becomes available in a later phase",
+      "twin": {
+        "title": "Digital twin",
+        "description": "A live simulation of your farm"
+      },
+      "alerts": {
+        "title": "Alerts",
+        "description": "Threshold and predictive warnings"
+      },
+      "automation": {
+        "title": "Automation",
+        "description": "Rules that act on your devices"
+      },
+      "settings": {
+        "title": "Settings",
+        "description": "Farm and account settings"
+      }
+    }
+  },
+  "common": {
+    "landing": "Landing",
+    "auth": "Authentication",
+    "app": "Application"
+  },
+  "sensors": {
+    "ph": "pH",
+    "water_temp": "Water temperature",
+    "dissolved_oxygen": "Dissolved oxygen",
+    "ammonia": "Ammonia",
+    "nitrite": "Nitrite",
+    "nitrate": "Nitrate"
+  },
+  "devices": {
+    "main_pump": "Main pump",
+    "backup_pump": "Backup pump",
+    "aerator": "Aerator",
+    "feeder": "Feeder",
+    "grow_light": "Grow light",
+    "heater": "Heater"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "how": "How it works",
+      "signIn": "Sign in",
+      "getStarted": "Get started",
+      "openApp": "Open app"
+    },
+    "hero": {
+      "label": "Digital twin for aquaponics",
+      "title": "Your farm has a twin. It never sleeps.",
+      "subtitle": "AquaTwin mirrors your aquaponic system in real time, predicts critical shifts hours before they happen and acts while there is still time to save the fish and the harvest.",
+      "getStarted": "Get started",
+      "seeHow": "See how it works",
+      "liveView": "Live view",
+      "normal": "Normal",
+      "warning": "Warning",
+      "prediction": "Prediction: ammonia reaches warning level in 3 h 40 m"
+    },
+    "problem": {
+      "label": "The problem",
+      "title": "Aquaponics is a fragile balance",
+      "body": "Fish, bacteria and plants share one water loop. A small shift in pH, temperature or ammonia can kill the entire stock within hours.",
+      "stat1Label": "from first deviation to fish loss",
+      "stat2Label": "critical water parameters",
+      "stat3Label": "of the stock at risk at once"
+    },
+    "how": {
+      "label": "How it works",
+      "title": "From sensors to decisions",
+      "step1Title": "Sensors stream live data",
+      "step1Body": "Probes in the tank read water quality continuously and send every value to AquaTwin.",
+      "step2Title": "The twin mirrors the farm",
+      "step2Body": "A live digital copy holds the current state of every tank and every parameter.",
+      "step3Title": "The system forecasts trends",
+      "step3Body": "Models project where each parameter is heading and how soon it reaches a limit.",
+      "step4Title": "Automation reacts in time",
+      "step4Body": "Rules switch pumps, aeration and feeding before a threshold is ever crossed."
+    },
+    "features": {
+      "label": "Features",
+      "title": "One platform, four safety nets",
+      "monitoringTitle": "Real time monitoring",
+      "monitoringBody": "All six water metrics on one dashboard, updated the moment a sensor reports.",
+      "alertsTitle": "Predictive alerts",
+      "alertsBody": "Warnings arrive hours before a critical level, each with a concrete recommendation.",
+      "simulationTitle": "What if simulation",
+      "simulationBody": "Test feed, temperature or stocking changes on the twin before you touch the real farm.",
+      "automationTitle": "Automation",
+      "automationBody": "Rules that switch pumps, aeration, feeding and light without a human in the loop."
+    },
+    "cta": {
+      "title": "Lose alerts, not fish",
+      "body": "Set up your first digital twin in minutes and let AquaTwin watch the water while you focus on growing.",
+      "button": "Create your farm"
+    },
+    "footer": {
+      "copyright": "© 2026 AquaTwin"
+    }
+  },
+  "auth": {
+    "tabs": {
+      "signIn": "Sign in",
+      "signUp": "Sign up"
+    },
+    "fields": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Your password",
+      "newPasswordPlaceholder": "At least 8 characters",
+      "confirmLabel": "Confirm password",
+      "confirmPlaceholder": "Repeat your password"
+    },
+    "actions": {
+      "signIn": "Sign in",
+      "signUp": "Create account",
+      "pending": "Please wait",
+      "signOut": "Sign out"
+    },
+    "validation": {
+      "email": "Enter a valid email address",
+      "passwordRequired": "Enter your password",
+      "passwordLength": "Password must be at least 8 characters",
+      "passwordMatch": "Passwords do not match"
+    },
+    "errors": {
+      "invalid_credentials": "Email or password is incorrect",
+      "user_already_exists": "An account with this email already exists",
+      "weak_password": "Choose a stronger password with at least 8 characters",
+      "rate_limited": "Too many attempts. Wait a moment and try again",
+      "network": "Network problem. Check your connection and try again",
+      "unknown": "Something went wrong. Please try again"
+    },
+    "notice": {
+      "checkInbox": "Check your inbox to confirm the address before signing in"
+    },
+    "aria": {
+      "tabs": "Authentication"
+    }
+  }
+}
