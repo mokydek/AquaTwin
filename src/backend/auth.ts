@@ -71,6 +71,33 @@ export async function signUpWithPassword(email: string, password: string): Promi
   }
 }
 
+export async function signInAnonymously(): Promise<AuthResult> {
+  try {
+    const { data, error } = await supabase.auth.signInAnonymously()
+    if (error) return { ok: false, code: toAuthErrorCode(error) }
+    return { ok: true, session: data.session, user: data.user }
+  } catch (error) {
+    return { ok: false, code: toAuthErrorCode(error) }
+  }
+}
+
+// Promotes the current anonymous user to a permanent account by attaching an
+// email and password. This keeps the SAME user id, so every farm, sensor,
+// reading and rule the visitor created during the demo stays with them. The
+// error mapping matches sign up (email already taken, weak password).
+export async function convertAnonymousAccount(
+  email: string,
+  password: string,
+): Promise<AuthResult> {
+  try {
+    const { data, error } = await supabase.auth.updateUser({ email, password })
+    if (error) return { ok: false, code: toAuthErrorCode(error) }
+    return { ok: true, session: null, user: data.user }
+  } catch (error) {
+    return { ok: false, code: toAuthErrorCode(error) }
+  }
+}
+
 export async function signInWithPassword(email: string, password: string): Promise<AuthResult> {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })

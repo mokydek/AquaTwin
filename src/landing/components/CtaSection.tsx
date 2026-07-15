@@ -19,6 +19,7 @@ export function CtaSection() {
             {t('landing.cta.button')}
           </Button>
         </div>
+        <p className="mt-4 text-sm text-background/70">{t('landing.cta.demoNote')}</p>
       </div>
     </section>
   )

@@ -6,6 +6,7 @@ import type { Alert, Device } from '@/backend'
 import { getReadings, listDevices, setDeviceState } from '@/backend'
 import { etaText } from '@/frontend/alerts/format'
 import { useAlerts } from '@/frontend/alerts/AlertsProvider'
+import { useAuth } from '@/frontend/auth/AuthProvider'
 import { useLiveReadings } from '@/frontend/data/LiveReadingsProvider'
 import { useFarm } from '@/frontend/farm/FarmProvider'
 import { useSimulator } from '@/frontend/simulator/SimulatorProvider'
@@ -48,6 +49,7 @@ export default function DashboardPage() {
   const { t } = useTranslation()
   usePageTitle(`${t('app.nav.dashboard')} · ${t('app.name')}`)
   const { activeFarm, activeFarmId } = useFarm()
+  const { isAnonymous } = useAuth()
   const { toast } = useToast()
   const { sensors, bySensorType, latest, getThresholds, hardwareConnected } = useLiveReadings()
   const { active } = useAlerts()
@@ -195,6 +197,13 @@ export default function DashboardPage() {
     }
   }
 
+  // Demo crisis shortcuts: make sure the local simulator is running, then flip
+  // the matching anomaly on (or off, toggling back).
+  function triggerCrisis(type: SensorType) {
+    if (!running) start()
+    toggleAnomaly(type)
+  }
+
   const loading = sensors.length === 0 ? false : !readingsReady
   const orderedSensors = byOrder(sensors, SENSOR_TYPE_LIST)
   const orderedDevices = devices ? byOrder(devices, DEVICE_TYPE_LIST) : []
@@ -228,6 +237,31 @@ export default function DashboardPage() {
 
       {hardwareConnected && running ? (
         <p className="text-[13px] text-muted">{t('app.dashboard.mixingWarning')}</p>
+      ) : null}
+
+      {isAnonymous ? (
+        <Card className="flex flex-col gap-3 p-4">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-medium text-foreground">{t('demo.crisis.title')}</h2>
+            <p className="text-[13px] text-muted">{t('demo.crisis.hint')}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={anomalies.ammonia ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => triggerCrisis('ammonia')}
+            >
+              {t('demo.crisis.ammonia')}
+            </Button>
+            <Button
+              variant={anomalies.dissolved_oxygen ? 'primary' : 'secondary'}
+              size="sm"
+              onClick={() => triggerCrisis('dissolved_oxygen')}
+            >
+              {t('demo.crisis.oxygen')}
+            </Button>
+          </div>
+        </Card>
       ) : null}
 
       {loading ? (

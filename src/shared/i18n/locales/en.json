@@ -114,6 +114,7 @@
       "how": "How it works",
       "signIn": "Sign in",
       "getStarted": "Get started",
+      "liveDemo": "Live demo",
       "openApp": "Open app"
     },
     "hero": {
@@ -122,6 +123,7 @@
       "subtitle": "AquaTwin mirrors your aquaponic system in real time, predicts critical shifts hours before they happen and acts while there is still time to save the fish and the harvest.",
       "getStarted": "Get started",
       "seeHow": "See how it works",
+      "tryDemo": "Try live demo",
       "liveView": "Live view",
       "normal": "Normal",
       "warning": "Warning",
@@ -162,7 +164,8 @@
     "cta": {
       "title": "Lose alerts, not fish",
       "body": "Set up your first digital twin in minutes and let AquaTwin watch the water while you focus on growing.",
-      "button": "Create your farm"
+      "button": "Create your farm",
+      "demoNote": "The live demo is available without registration."
     },
     "footer": {
       "copyright": "© 2026 AquaTwin"
@@ -470,6 +473,39 @@
     "empty": "No data for this period yet",
     "error": "Could not load the report",
     "retry": "Retry"
+  },
+  "demo": {
+    "title": "Live demo",
+    "farmName": "Demo farm",
+    "entry": {
+      "farm": "Creating your farm",
+      "history": "Loading 24 hours of history",
+      "sensors": "Starting sensors",
+      "error": "Could not start the demo",
+      "retry": "Try again"
+    },
+    "banner": {
+      "text": "Demo mode. This sandbox farm is yours to break. It is removed after 7 days.",
+      "keep": "Keep this farm"
+    },
+    "convert": {
+      "title": "Keep this farm",
+      "description": "Add an email and password. Your farm and all its data stay with you.",
+      "submit": "Create account",
+      "pending": "Saving",
+      "success": "Your account is ready, the farm stays with you",
+      "cancel": "Cancel"
+    },
+    "crisis": {
+      "title": "Try a crisis",
+      "ammonia": "Ammonia spike",
+      "oxygen": "Oxygen drop",
+      "hint": "Watch the forecast, the alerts and the automation react."
+    },
+    "settings": {
+      "passwordNotice": "You are in demo mode. Use Keep this farm to set an email and password.",
+      "apiNotice": "Data source keys become available once you keep this farm with an account."
+    }
   },
   "system": {
     "errorTitle": "Something broke",

@@ -7,6 +7,7 @@ import { AlertEngineProvider } from '@/frontend/alerts/AlertEngineProvider'
 import { AlertsProvider } from '@/frontend/alerts/AlertsProvider'
 import { RuleEngineProvider } from '@/frontend/automation/RuleEngineProvider'
 import { LiveReadingsProvider } from '@/frontend/data/LiveReadingsProvider'
+import { DemoBanner } from '@/frontend/demo/DemoBanner'
 import { FarmProvider, useFarm } from '@/frontend/farm/FarmProvider'
 import { OnboardingScreen } from '@/frontend/farm/OnboardingScreen'
 import { SidebarContent } from '@/frontend/layout/SidebarContent'
@@ -114,6 +115,7 @@ function AppShell() {
               <MobileBar />
 
               <main className="md:pl-[232px] print:pl-0">
+                <DemoBanner />
                 <div className="mx-auto max-w-[1120px] p-6 md:p-8 print:max-w-none print:p-0">
                   <Outlet />
                 </div>

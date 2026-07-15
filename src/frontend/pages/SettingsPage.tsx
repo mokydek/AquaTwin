@@ -67,7 +67,7 @@ function Notice({ children }: { children: ReactNode }) {
 export default function SettingsPage() {
   const { t } = useTranslation()
   usePageTitle(`${t('app.nav.settings')} · ${t('app.name')}`)
-  const { user } = useAuth()
+  const { user, isAnonymous } = useAuth()
   const { activeFarm, activeFarmId, refreshFarms } = useFarm()
   const { sensors, refreshSensors } = useLiveReadings()
   const { toast } = useToast()
@@ -204,6 +204,10 @@ export default function SettingsPage() {
       <Card>
         <CardHeader title={t('settings.profile')} description={t('settings.profileHint')} />
         <CardContent className="flex flex-col gap-5">
+          {isAnonymous ? (
+            <Notice>{t('demo.settings.passwordNotice')}</Notice>
+          ) : (
+            <>
           <div className="flex flex-col gap-1">
             <span className="text-[11px] uppercase tracking-wider text-muted">
               {t('settings.email')}
@@ -247,6 +251,8 @@ export default function SettingsPage() {
               </Button>
             </div>
           </form>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -343,7 +349,19 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <DataSourcesSection />
+      {isAnonymous ? (
+        <Card>
+          <CardHeader
+            title={t('settings.dataSources.title')}
+            description={t('settings.dataSources.hint')}
+          />
+          <CardContent>
+            <Notice>{t('demo.settings.apiNotice')}</Notice>
+          </CardContent>
+        </Card>
+      ) : (
+        <DataSourcesSection />
+      )}
 
       <div className="rounded-sharp border border-foreground">
         <CardHeader title={t('settings.dangerZone')} description={t('settings.dangerHint')} />

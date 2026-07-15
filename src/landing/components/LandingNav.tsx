@@ -31,6 +31,9 @@ export function LandingNav() {
             </Button>
           ) : (
             <>
+              <Link to="/demo" className={navLink}>
+                {t('landing.nav.liveDemo')}
+              </Link>
               <Link to="/auth" className={`hidden sm:block ${navLink}`}>
                 {t('landing.nav.signIn')}
               </Link>

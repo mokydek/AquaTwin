@@ -8,7 +8,12 @@ type AuthContextValue = {
   user: User | null
   session: Session | null
   loading: boolean
+  // True when signed in as a Supabase anonymous user (the public demo).
+  isAnonymous: boolean
   signOut: () => Promise<void>
+  // Re-reads the session, e.g. right after converting an anonymous account so
+  // the demo banner disappears immediately.
+  refreshAuth: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -42,9 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       session,
       loading,
+      isAnonymous: session?.user?.is_anonymous === true,
       signOut: async () => {
         await backendSignOut()
         setSession(null)
+      },
+      refreshAuth: async () => {
+        const current = await getSession()
+        setSession(current)
       },
     }),
     [session, loading],

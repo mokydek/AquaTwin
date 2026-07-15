@@ -7,6 +7,7 @@ import { RouteFallback } from '@/frontend/system/RouteFallback'
 
 const LandingPage = lazy(() => import('@/landing/pages/LandingPage'))
 const AuthPage = lazy(() => import('@/frontend/pages/AuthPage'))
+const DemoPage = lazy(() => import('@/frontend/pages/DemoPage'))
 const AppLayout = lazy(() => import('@/frontend/layout/AppLayout'))
 const DashboardPage = lazy(() => import('@/frontend/pages/DashboardPage'))
 const LivestockPage = lazy(() => import('@/frontend/pages/LivestockPage'))
@@ -25,6 +26,7 @@ function suspended(node: ReactNode) {
 export const router = createBrowserRouter([
   { path: '/', element: suspended(<LandingPage />) },
   { path: '/auth', element: suspended(<AuthPage />) },
+  { path: '/demo', element: suspended(<DemoPage />) },
   {
     element: <ProtectedRoute />,
     children: [

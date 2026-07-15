@@ -23,13 +23,22 @@ export function Hero() {
             {t('landing.hero.title')}
           </h1>
           <p className="max-w-xl text-base text-muted sm:text-lg">{t('landing.hero.subtitle')}</p>
-          <div className="flex flex-wrap gap-3">
-            <Button size="md" onClick={() => navigate('/auth')}>
-              {t('landing.hero.getStarted')}
-            </Button>
-            <Button variant="secondary" size="md" onClick={() => scrollToId('how')}>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap gap-3">
+              <Button size="md" onClick={() => navigate('/auth')}>
+                {t('landing.hero.getStarted')}
+              </Button>
+              <Button variant="secondary" size="md" onClick={() => navigate('/demo')}>
+                {t('landing.hero.tryDemo')}
+              </Button>
+            </div>
+            <button
+              type="button"
+              onClick={() => scrollToId('how')}
+              className="self-start text-sm text-muted transition-colors duration-150 hover:text-foreground"
+            >
               {t('landing.hero.seeHow')}
-            </Button>
+            </button>
           </div>
         </div>
         <LiveMetricsPanel />

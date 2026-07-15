@@ -3,6 +3,8 @@
 export * from '@/backend/types'
 export { BackendError } from '@/backend/errors'
 export { createFarmWithDefaults, deleteFarm, getFarm, listFarms, renameFarm } from '@/backend/farms'
+export { setupDemoFarm } from '@/backend/demo'
+export type { DemoContent, DemoProgress, DemoStage } from '@/backend/demo'
 export { listSensors, updateSensorThresholds, validThresholds } from '@/backend/sensors'
 export type { ThresholdPatch, ThresholdResult } from '@/backend/sensors'
 export { subscribeConnection } from '@/backend/connection'
@@ -70,7 +72,9 @@ export {
 } from '@/backend/alerts'
 export type { AlertChange } from '@/backend/alerts'
 export {
+  convertAnonymousAccount,
   getSession,
+  signInAnonymously,
   signInWithPassword,
   signOut,
   signUpWithPassword,
