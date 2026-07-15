@@ -1,7 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import type { ReadingRow, Sensor } from '@/backend'
+import type { ReadingRow, ReadingSource, Sensor } from '@/backend'
 import { getReadings, listSensors, subscribeToReadings } from '@/backend'
 import { useFarm } from '@/frontend/farm/FarmProvider'
 import { useSimulator } from '@/frontend/simulator/SimulatorProvider'
@@ -10,6 +10,7 @@ import { SENSOR_TYPES } from '@/shared/config/aquaponics'
 import type { LineChartPoint } from '@/shared/ui'
 
 const LIVE_WINDOW_MS = 60 * 60 * 1000
+const HARDWARE_FRESH_MS = 5 * 60 * 1000
 
 type LiveReadingsValue = {
   bySensorType: Map<SensorType, LineChartPoint[]>
@@ -19,6 +20,8 @@ type LiveReadingsValue = {
   // the config values as a fallback until the rows load.
   getThresholds: (type: SensorType) => Thresholds
   refreshSensors: () => Promise<void>
+  // True when a sensor's latest reading came from real hardware within 5 minutes.
+  hardwareConnected: boolean
 }
 
 const LiveReadingsContext = createContext<LiveReadingsValue | null>(null)
@@ -28,6 +31,7 @@ export function LiveReadingsProvider({ children }: { children: ReactNode }) {
   const { subscribeLocal } = useSimulator()
   const [sensors, setSensors] = useState<Sensor[]>([])
   const [pointsById, setPointsById] = useState<Record<string, LineChartPoint[]>>({})
+  const latestSourceRef = useRef<Map<string, { t: number; source: ReadingSource }>>(new Map())
 
   const sensorKey = sensors.map((sensor) => sensor.id).join(',')
 
@@ -39,6 +43,7 @@ export function LiveReadingsProvider({ children }: { children: ReactNode }) {
     }
     let active = true
     setPointsById({})
+    latestSourceRef.current = new Map()
     listSensors(activeFarmId)
       .then(async (list) => {
         if (!active) return
@@ -49,10 +54,15 @@ export function LiveReadingsProvider({ children }: { children: ReactNode }) {
         if (!active) return
         const initial: Record<string, LineChartPoint[]> = {}
         for (const id of ids) {
-          initial[id] = (grouped[id] ?? []).map((row) => ({
-            t: Date.parse(row.recorded_at),
-            value: row.value,
-          }))
+          const rows = grouped[id] ?? []
+          initial[id] = rows.map((row) => ({ t: Date.parse(row.recorded_at), value: row.value }))
+          const lastRow = rows[rows.length - 1]
+          if (lastRow) {
+            latestSourceRef.current.set(id, {
+              t: Date.parse(lastRow.recorded_at),
+              source: lastRow.source ?? 'simulation',
+            })
+          }
         }
         setPointsById(initial)
       })
@@ -87,6 +97,7 @@ export function LiveReadingsProvider({ children }: { children: ReactNode }) {
         const time = Date.parse(row.recorded_at)
         if (arr.length > 0 && time <= arr[arr.length - 1].t) continue
         next[row.sensor_id] = [...arr, { t: time, value: row.value }].filter((p) => p.t >= cutoff)
+        latestSourceRef.current.set(row.sensor_id, { t: time, source: row.source ?? 'simulation' })
         changed = true
       }
       return changed ? next : previous
@@ -145,12 +156,16 @@ export function LiveReadingsProvider({ children }: { children: ReactNode }) {
   const value = useMemo<LiveReadingsValue>(() => {
     const bySensorType = new Map<SensorType, LineChartPoint[]>()
     const latest = new Map<SensorType, number>()
+    const freshAfter = Date.now() - HARDWARE_FRESH_MS
+    let hardwareConnected = false
     for (const sensor of sensors) {
       const arr = pointsById[sensor.id] ?? []
       bySensorType.set(sensor.type, arr)
       if (arr.length > 0) latest.set(sensor.type, arr[arr.length - 1].value)
+      const meta = latestSourceRef.current.get(sensor.id)
+      if (meta && meta.source === 'hardware' && meta.t >= freshAfter) hardwareConnected = true
     }
-    return { bySensorType, latest, sensors, getThresholds, refreshSensors }
+    return { bySensorType, latest, sensors, getThresholds, refreshSensors, hardwareConnected }
   }, [pointsById, sensors, getThresholds, refreshSensors])
 
   return <LiveReadingsContext.Provider value={value}>{children}</LiveReadingsContext.Provider>

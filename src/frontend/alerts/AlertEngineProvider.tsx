@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { createAlert, listActiveAlerts, resolveAlerts, updateAlertEta } from '@/backend'
 import { useFarm } from '@/frontend/farm/FarmProvider'
 import { useLiveReadings } from '@/frontend/data/LiveReadingsProvider'
+import { useSimulator } from '@/frontend/simulator/SimulatorProvider'
 import type { SensorType, Thresholds } from '@/shared/config/aquaponics'
 import { computeStatus } from '@/shared/lib/status'
 import type { Status } from '@/shared/lib/status'
@@ -47,9 +48,17 @@ function crossedBound(value: number, thresholds: Thresholds, severity: Status): 
   return null
 }
 
+/*
+ * Alert ownership model: the client alert engine writes alerts ONLY while the
+ * Local demo simulation is running. For server simulation farms and hardware
+ * farms the server side scheduled function (simulate-tick) owns alert writing,
+ * so the client stays passive there and two writers never race. When the local
+ * simulator is stopped this provider does nothing.
+ */
 export function AlertEngineProvider({ children }: { children: ReactNode }) {
   const { activeFarmId } = useFarm()
   const { latest, bySensorType, sensors, getThresholds } = useLiveReadings()
+  const { running } = useSimulator()
 
   const lastStatusRef = useRef<Map<SensorType, Status>>(new Map())
   const managedRef = useRef<Map<string, string>>(new Map())
@@ -83,7 +92,7 @@ export function AlertEngineProvider({ children }: { children: ReactNode }) {
 
   // Threshold alerts: react to status transitions in the latest values.
   useEffect(() => {
-    if (!activeFarmId || latest.size === 0) return
+    if (!activeFarmId || latest.size === 0 || !running) return
 
     if (!initializedRef.current) {
       for (const sensor of sensors) {
@@ -126,12 +135,12 @@ export function AlertEngineProvider({ children }: { children: ReactNode }) {
         .then((alert) => managedRef.current.set(key, alert.id))
         .catch(() => managedRef.current.delete(key))
     }
-  }, [latest, sensors, activeFarmId, getThresholds])
+  }, [latest, sensors, activeFarmId, getThresholds, running])
 
   // Prediction alerts: evaluate trends on a fixed cadence.
   useEffect(() => {
     predictionFnRef.current = () => {
-      if (!activeFarmId) return
+      if (!activeFarmId || !running) return
       const cutoff = Date.now() - PREDICTION_WINDOW_MS
 
       for (const sensor of sensors) {

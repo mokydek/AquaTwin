@@ -8,6 +8,7 @@ import { deleteFarm, renameFarm, updatePassword, updateSensorThresholds } from '
 import { useAuth } from '@/frontend/auth/AuthProvider'
 import { useLiveReadings } from '@/frontend/data/LiveReadingsProvider'
 import { useFarm } from '@/frontend/farm/FarmProvider'
+import { DataSourcesSection } from '@/frontend/settings/DataSourcesSection'
 import { SENSOR_TYPES } from '@/shared/config/aquaponics'
 import { usePageTitle } from '@/shared/lib/usePageTitle'
 import {
@@ -341,6 +342,8 @@ export default function SettingsPage() {
           <LanguageSwitcher />
         </CardContent>
       </Card>
+
+      <DataSourcesSection />
 
       <div className="rounded-sharp border border-foreground">
         <CardHeader title={t('settings.dangerZone')} description={t('settings.dangerHint')} />

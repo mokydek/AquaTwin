@@ -11,6 +11,7 @@ export type AlertSeverity = 'warning' | 'critical'
 export type RuleCondition = 'above' | 'below'
 export type RuleAction = 'turn_on' | 'turn_off'
 export type TriggeredBy = 'rule' | 'manual'
+export type ReadingSource = 'simulation' | 'hardware'
 export type NodeType = 'fish_tank' | 'grow_bed' | 'biofilter' | 'sump' | 'pump'
 // jsonb props, loosely typed here; layout.ts narrows per node type.
 export type NodeProps = {
@@ -89,18 +90,21 @@ export interface Database {
           sensor_id: string
           value: number
           recorded_at: string
+          source: ReadingSource
         }
         Insert: {
           id?: number
           sensor_id: string
           value: number
           recorded_at?: string
+          source?: ReadingSource
         }
         Update: {
           id?: number
           sensor_id?: string
           value?: number
           recorded_at?: string
+          source?: ReadingSource
         }
         Relationships: []
       }
@@ -365,6 +369,39 @@ export interface Database {
         }
         Relationships: []
       }
+      farm_api_keys: {
+        Row: {
+          id: string
+          farm_id: string
+          key_hash: string
+          key_prefix: string
+          label: string
+          created_at: string
+          last_used_at: string | null
+          revoked: boolean
+        }
+        Insert: {
+          id?: string
+          farm_id: string
+          key_hash: string
+          key_prefix: string
+          label: string
+          created_at?: string
+          last_used_at?: string | null
+          revoked?: boolean
+        }
+        Update: {
+          id?: string
+          farm_id?: string
+          key_hash?: string
+          key_prefix?: string
+          label?: string
+          created_at?: string
+          last_used_at?: string | null
+          revoked?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -385,3 +422,4 @@ export type FarmNode = Database['public']['Tables']['farm_nodes']['Row']
 export type FarmEdge = Database['public']['Tables']['farm_edges']['Row']
 export type FishBatch = Database['public']['Tables']['fish_batches']['Row']
 export type FishEvent = Database['public']['Tables']['fish_events']['Row']
+export type FarmApiKey = Database['public']['Tables']['farm_api_keys']['Row']

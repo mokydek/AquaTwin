@@ -1,10 +1,15 @@
 import { supabase } from '@/backend/client'
 import { BackendError } from '@/backend/errors'
+import type { ReadingSource } from '@/backend/types'
+
+export type { ReadingSource }
 
 export type ReadingRow = {
   sensor_id: string
   value: number
   recorded_at: string
+  // Present on reads; omitted on inserts (the column defaults to 'simulation').
+  source?: ReadingSource
 }
 
 const INSERT_CHUNK = 500
@@ -27,7 +32,7 @@ export async function getReadings(
 
   const { data, error } = await supabase
     .from('readings')
-    .select('sensor_id, value, recorded_at')
+    .select('sensor_id, value, recorded_at, source')
     .in('sensor_id', sensorIds)
     .gte('recorded_at', fromIso)
     .order('recorded_at', { ascending: true })
@@ -53,14 +58,24 @@ export function subscribeToReadings(
     'postgres_changes',
     { event: 'INSERT', schema: 'public', table: 'readings' },
     (payload) => {
-      const row = payload.new as { sensor_id?: string; value?: number; recorded_at?: string }
+      const row = payload.new as {
+        sensor_id?: string
+        value?: number
+        recorded_at?: string
+        source?: ReadingSource
+      }
       if (
         typeof row.sensor_id === 'string' &&
         typeof row.value === 'number' &&
         typeof row.recorded_at === 'string' &&
         allowed.has(row.sensor_id)
       ) {
-        onInsert({ sensor_id: row.sensor_id, value: row.value, recorded_at: row.recorded_at })
+        onInsert({
+          sensor_id: row.sensor_id,
+          value: row.value,
+          recorded_at: row.recorded_at,
+          source: row.source === 'hardware' ? 'hardware' : 'simulation',
+        })
       }
     },
   )

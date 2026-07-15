@@ -22,6 +22,8 @@ export {
 } from '@/backend/layout'
 export type { Layout } from '@/backend/layout'
 export { createBatch, deleteBatch, listBatches, listEvents, logEvent } from '@/backend/livestock'
+export { createApiKey, listApiKeys, revokeApiKey } from '@/backend/apiKeys'
+export type { ApiKeyView } from '@/backend/apiKeys'
 export { listDevices, setDeviceState, subscribeToDevices } from '@/backend/devices'
 export type { SetDeviceResult } from '@/backend/devices'
 export {
@@ -35,7 +37,7 @@ export {
 } from '@/backend/automation'
 export type { AutomationEventInsert, AutomationEventRow } from '@/backend/automation'
 export { getReadings, insertReadings, subscribeToReadings } from '@/backend/readings'
-export type { ReadingRow } from '@/backend/readings'
+export type { ReadingRow, ReadingSource } from '@/backend/readings'
 export {
   acknowledgeAlert,
   createAlert,

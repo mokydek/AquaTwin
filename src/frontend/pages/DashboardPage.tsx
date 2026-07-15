@@ -49,7 +49,7 @@ export default function DashboardPage() {
   usePageTitle(`${t('app.nav.dashboard')} · ${t('app.name')}`)
   const { activeFarm, activeFarmId } = useFarm()
   const { toast } = useToast()
-  const { sensors, bySensorType, latest, getThresholds } = useLiveReadings()
+  const { sensors, bySensorType, latest, getThresholds, hardwareConnected } = useLiveReadings()
   const { active } = useAlerts()
   const {
     running,
@@ -213,12 +213,22 @@ export default function DashboardPage() {
       <Button variant="ghost" size="sm" disabled={generating} onClick={handleGenerate}>
         {generating ? t('app.simulator.generating') : t('app.simulator.generate')}
       </Button>
+      {hardwareConnected ? (
+        <Badge variant="ok">
+          <span aria-hidden="true" className="h-1.5 w-1.5 animate-pulse bg-foreground" />
+          {t('app.dashboard.hardwareConnected')}
+        </Badge>
+      ) : null}
     </div>
   )
 
   return (
     <div className="flex flex-col gap-10">
       <PageHeader title={activeFarm?.name ?? ''} actions={simulatorControls} />
+
+      {hardwareConnected && running ? (
+        <p className="text-[13px] text-muted">{t('app.dashboard.mixingWarning')}</p>
+      ) : null}
 
       {loading ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
