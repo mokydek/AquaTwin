@@ -13,6 +13,7 @@ const LivestockPage = lazy(() => import('@/frontend/pages/LivestockPage'))
 const AlertsPage = lazy(() => import('@/frontend/pages/AlertsPage'))
 const TwinPage = lazy(() => import('@/frontend/pages/TwinPage'))
 const AutomationPage = lazy(() => import('@/frontend/pages/AutomationPage'))
+const ReportsPage = lazy(() => import('@/frontend/pages/ReportsPage'))
 const SettingsPage = lazy(() => import('@/frontend/pages/SettingsPage'))
 const UiKitPage = lazy(() => import('@/frontend/pages/UiKitPage'))
 const NotFound = lazy(() => import('@/shared/ui/NotFound'))
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
           { path: 'twin', element: suspended(<TwinPage />) },
           { path: 'alerts', element: suspended(<AlertsPage />) },
           { path: 'automation', element: suspended(<AutomationPage />) },
+          { path: 'reports', element: suspended(<ReportsPage />) },
           { path: 'settings', element: suspended(<SettingsPage />) },
         ],
       },

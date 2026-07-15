@@ -3,6 +3,7 @@
     "name": "AquaTwin",
     "tagline": "The digital twin for aquaponic farms",
     "nav": {
+      "reports": "Reports",
       "dashboard": "Dashboard",
       "livestock": "Livestock",
       "twin": "Digital twin",
@@ -396,6 +397,79 @@
       "turnedOn": "Automation: {{device}} turned on by rule {{rule}}",
       "turnedOff": "Automation: {{device}} turned off by rule {{rule}}"
     }
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Performance summary and data export for your farm",
+    "period": {
+      "last7": "Last 7 days",
+      "last30": "Last 30 days",
+      "aria": "Report period"
+    },
+    "savePdf": "Save PDF",
+    "export": "Export",
+    "exportReadings": "Readings CSV",
+    "exportAlerts": "Alerts CSV",
+    "exportLivestock": "Livestock CSV",
+    "exporting": "Exporting",
+    "exported": "Export ready",
+    "exportFailed": "Could not build the export. Please try again",
+    "generated": "Generated {{date}}",
+    "printTitle": "AquaTwin Report {{farm}} {{period}}",
+    "sections": {
+      "stability": "Stability index",
+      "waterQuality": "Water quality",
+      "hourly": "Hourly averages",
+      "incidents": "Incidents",
+      "livestock": "Livestock",
+      "automation": "Automation",
+      "dataSources": "Data sources"
+    },
+    "stability": {
+      "outOf": "out of 100",
+      "footnote": "100 minus 40 times the share of critical time minus 15 times the share of warning time, averaged across sensors."
+    },
+    "water": {
+      "sensor": "Sensor",
+      "avg": "Average",
+      "min": "Min",
+      "max": "Max",
+      "time": "Time in range",
+      "samples": "Samples",
+      "hardware": "Hardware"
+    },
+    "incidents": {
+      "total": "Total alerts",
+      "critical": "Critical",
+      "longest": "Longest incident",
+      "time": "Time",
+      "sensor": "Sensor",
+      "kind": "Type",
+      "severity": "Severity",
+      "duration": "Duration",
+      "ongoing": "Ongoing",
+      "empty": "No incidents in this period"
+    },
+    "livestock": {
+      "fishCount": "Live fish",
+      "biomass": "Biomass",
+      "mortality": "Mortality",
+      "harvested": "Harvested"
+    },
+    "automation": {
+      "ruleActions": "Rule actions",
+      "manualActions": "Manual actions",
+      "device": "Device",
+      "count": "Actions",
+      "empty": "No device actions in this period"
+    },
+    "dataSources": {
+      "simulation": "Simulation",
+      "hardware": "Hardware"
+    },
+    "empty": "No data for this period yet",
+    "error": "Could not load the report",
+    "retry": "Retry"
   },
   "system": {
     "errorTitle": "Something broke",

@@ -39,6 +39,27 @@ export type { AutomationEventInsert, AutomationEventRow } from '@/backend/automa
 export { getReadings, insertReadings, subscribeToReadings } from '@/backend/readings'
 export type { ReadingRow, ReadingSource } from '@/backend/readings'
 export {
+  exportAlertsCsv,
+  exportFishEventsCsv,
+  exportReadingsCsv,
+  getAlertsInRange,
+  getAutomationSummary,
+  getHourlySeries,
+  getLivestockSummary,
+  getReportStats,
+  MAX_EXPORT_DAYS,
+} from '@/backend/reports'
+export type {
+  AlertExportRow,
+  AutomationSummary,
+  FishEventExportRow,
+  HourlyPoint,
+  LivestockSummary,
+  RangeAlert,
+  ReadingExportRow,
+  SensorStat,
+} from '@/backend/reports'
+export {
   acknowledgeAlert,
   createAlert,
   listActiveAlerts,

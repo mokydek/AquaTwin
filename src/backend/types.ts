@@ -404,7 +404,32 @@ export interface Database {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      // Report aggregates. Both are language sql, stable, security invoker, so
+      // the caller's RLS on readings and sensors still applies (see 0006).
+      report_sensor_stats: {
+        Args: { p_farm: string; p_from: string; p_to: string }
+        Returns: {
+          sensor_type: string
+          avg_value: number
+          min_value: number
+          max_value: number
+          pct_ok: number
+          pct_warning: number
+          pct_critical: number
+          samples: number
+          hardware_share: number
+        }[]
+      }
+      report_hourly_series: {
+        Args: { p_farm: string; p_from: string; p_to: string }
+        Returns: {
+          sensor_type: string
+          bucket: string
+          avg_value: number
+        }[]
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }

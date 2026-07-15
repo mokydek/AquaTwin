@@ -23,7 +23,7 @@ function MobileBar() {
 
   return (
     <>
-      <div className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
+      <div className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden print:hidden">
         <Link to="/app">
           <Wordmark size="sm" />
         </Link>
@@ -107,14 +107,14 @@ function AppShell() {
           <AlertsProvider>
             <RuleEngineProvider>
             <div className="min-h-screen bg-background">
-              <aside className="fixed inset-y-0 left-0 z-30 hidden w-[232px] flex-col border-r border-border bg-background md:flex">
+              <aside className="fixed inset-y-0 left-0 z-30 hidden w-[232px] flex-col border-r border-border bg-background md:flex print:hidden">
                 <SidebarContent scope="desktop" />
               </aside>
 
               <MobileBar />
 
-              <main className="md:pl-[232px]">
-                <div className="mx-auto max-w-[1120px] p-6 md:p-8">
+              <main className="md:pl-[232px] print:pl-0">
+                <div className="mx-auto max-w-[1120px] p-6 md:p-8 print:max-w-none print:p-0">
                   <Outlet />
                 </div>
               </main>

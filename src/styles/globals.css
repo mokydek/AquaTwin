@@ -54,6 +54,30 @@ input[type="range"].range-mono:focus-visible {
   outline-offset: 4px;
 }
 
+/* Print layout for the reports page. App chrome (sidebar, mobile bar, page
+   header, tabs, buttons) is hidden via the Tailwind `print:` variant in the
+   components; this block handles the page geometry and ink that utilities
+   cannot express. */
+@media print {
+  @page {
+    margin: 16mm;
+  }
+
+  html,
+  body {
+    background: #ffffff;
+  }
+
+  /* Keep the monochrome fills (solid black critical badges, chart strokes)
+     instead of letting the browser drop backgrounds to save ink. */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
 /* Directional flow animation for the schematic pipes. */
 @keyframes twin-flow {
   to {
