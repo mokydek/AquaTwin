@@ -1,4 +1,4 @@
-import { Activity, Bell, FlaskConical, Settings, Zap } from 'lucide-react'
+import { Activity, Bell, Fish, FlaskConical, Settings, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
@@ -41,6 +41,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/app', end: true, icon: Activity, label: 'app.nav.dashboard' },
+  { to: '/app/livestock', icon: Fish, label: 'app.nav.livestock' },
   { to: '/app/twin', icon: FlaskConical, label: 'app.nav.twin' },
   { to: '/app/alerts', icon: Bell, label: 'app.nav.alerts' },
   { to: '/app/automation', icon: Zap, label: 'app.nav.automation' },

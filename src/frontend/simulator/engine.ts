@@ -45,11 +45,21 @@ function round(value: number): number {
 
 // One step of the model. Calm mode mean reverts to the setpoint; anomaly mode
 // applies a steady directional drift so the value walks past the thresholds.
-export function nextValue(type: SensorType, current: number, anomaly: boolean): number {
+// loadFactor scales the fish load: a heavier stock raises the ammonia setpoint
+// (more waste) and lowers the dissolved oxygen setpoint (more respiration).
+export function nextValue(
+  type: SensorType,
+  current: number,
+  anomaly: boolean,
+  loadFactor = 1,
+): number {
   const model = SENSOR_MODELS[type]
+  let setpoint = model.setpoint
+  if (type === 'ammonia') setpoint = model.setpoint * loadFactor
+  else if (type === 'dissolved_oxygen') setpoint = model.setpoint - (loadFactor - 1) * 1.2
   const next = anomaly
     ? current + model.anomalyDrift + gaussian(model.sigma * 0.4)
-    : current + model.k * (model.setpoint - current) + gaussian(model.sigma)
+    : current + model.k * (setpoint - current) + gaussian(model.sigma)
   return round(clamp(next, model.min, model.max))
 }
 
@@ -64,6 +74,7 @@ export function generateHistory(
   now: number,
   hours = 24,
   stepMinutes = 5,
+  loadFactor = 1,
 ): SimReading[] {
   const stepMs = stepMinutes * 60_000
   const start = now - hours * 60 * 60_000
@@ -75,7 +86,7 @@ export function generateHistory(
     const recorded_at = new Date(ts).toISOString()
     for (const sensor of sensors) {
       const current = state.get(sensor.id) ?? SENSOR_MODELS[sensor.type].setpoint
-      const value = nextValue(sensor.type, current, false)
+      const value = nextValue(sensor.type, current, false, loadFactor)
       state.set(sensor.id, value)
       rows.push({ sensor_id: sensor.id, value, recorded_at })
     }

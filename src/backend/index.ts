@@ -6,6 +6,22 @@ export { createFarmWithDefaults, deleteFarm, getFarm, listFarms, renameFarm } fr
 export { listSensors, updateSensorThresholds, validThresholds } from '@/backend/sensors'
 export type { ThresholdPatch, ThresholdResult } from '@/backend/sensors'
 export { subscribeConnection } from '@/backend/connection'
+export {
+  assignSensorToNode,
+  createEdge,
+  createNode,
+  defaultPropsFor,
+  deleteEdge,
+  deleteNode,
+  getLayout,
+  NODE_PROP_FIELD,
+  NODE_PROP_UNIT,
+  NODE_TYPES,
+  seedDefaultLayout,
+  updateNode,
+} from '@/backend/layout'
+export type { Layout } from '@/backend/layout'
+export { createBatch, deleteBatch, listBatches, listEvents, logEvent } from '@/backend/livestock'
 export { listDevices, setDeviceState, subscribeToDevices } from '@/backend/devices'
 export type { SetDeviceResult } from '@/backend/devices'
 export {

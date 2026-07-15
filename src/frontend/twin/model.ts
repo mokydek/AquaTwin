@@ -79,7 +79,15 @@ function oxygenSaturation(temp: number): number {
   return DO_SAT_BASE - DO_SAT_SLOPE * temp
 }
 
-export function step(state: WaterState, params: ModelParams, dtHours: number): WaterState {
+// volumeFactor > 1 means a larger system with more thermal and chemical inertia,
+// so every per step change is divided by it and the whole system drifts slower.
+export function step(
+  state: WaterState,
+  params: ModelParams,
+  dtHours: number,
+  volumeFactor = 1,
+): WaterState {
+  const inertia = volumeFactor <= 0 ? 1 : volumeFactor
   const temp = state.water_temp
   const tempFactor = temperatureFactor(temp)
   const oxygenFactor = state.dissolved_oxygen / (state.dissolved_oxygen + OXYGEN_HALF)
@@ -116,13 +124,14 @@ export function step(state: WaterState, params: ModelParams, dtHours: number): W
   // Temperature relaxes toward the setpoint with inertia.
   const dTemp = TEMP_RELAX * (params.waterTempSetpoint - temp)
 
+  const dt = dtHours / inertia
   return {
-    ph: clamp(state.ph + dPh * dtHours, 0, 14),
-    water_temp: clamp(temp + dTemp * dtHours, 0, 45),
-    dissolved_oxygen: clamp(state.dissolved_oxygen + dOxygen * dtHours, 0, 20),
-    ammonia: Math.max(0, state.ammonia + dAmmonia * dtHours),
-    nitrite: Math.max(0, state.nitrite + dNitrite * dtHours),
-    nitrate: Math.max(0, state.nitrate + dNitrate * dtHours),
+    ph: clamp(state.ph + dPh * dt, 0, 14),
+    water_temp: clamp(temp + dTemp * dt, 0, 45),
+    dissolved_oxygen: clamp(state.dissolved_oxygen + dOxygen * dt, 0, 20),
+    ammonia: Math.max(0, state.ammonia + dAmmonia * dt),
+    nitrite: Math.max(0, state.nitrite + dNitrite * dt),
+    nitrate: Math.max(0, state.nitrate + dNitrate * dt),
   }
 }
 
@@ -132,6 +141,7 @@ export function simulate(
   params: ModelParams,
   days: number,
   stepHours = 1,
+  volumeFactor = 1,
 ): SeriesPoint[] {
   const totalSteps = Math.max(1, Math.round((days * 24) / stepHours))
   const sampleEvery = Math.max(1, Math.floor(totalSteps / 120))
@@ -139,7 +149,7 @@ export function simulate(
   let state: WaterState = { ...initial }
   const series: SeriesPoint[] = [{ day: 0, ...state }]
   for (let i = 1; i <= totalSteps; i += 1) {
-    state = step(state, params, stepHours)
+    state = step(state, params, stepHours, volumeFactor)
     if (i % sampleEvery === 0 || i === totalSteps) {
       series.push({ day: (i * stepHours) / 24, ...state })
     }

@@ -21,3 +21,4 @@
 
 ## Process
 Development is phased. Build only what the current phase specifies. Never scaffold ahead. Do not run git commands unless explicitly asked.
+Schema changes ship as numbered files in supabase/migrations and must be applied before deploy.

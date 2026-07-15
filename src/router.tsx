@@ -9,6 +9,7 @@ const LandingPage = lazy(() => import('@/landing/pages/LandingPage'))
 const AuthPage = lazy(() => import('@/frontend/pages/AuthPage'))
 const AppLayout = lazy(() => import('@/frontend/layout/AppLayout'))
 const DashboardPage = lazy(() => import('@/frontend/pages/DashboardPage'))
+const LivestockPage = lazy(() => import('@/frontend/pages/LivestockPage'))
 const AlertsPage = lazy(() => import('@/frontend/pages/AlertsPage'))
 const TwinPage = lazy(() => import('@/frontend/pages/TwinPage'))
 const AutomationPage = lazy(() => import('@/frontend/pages/AutomationPage'))
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
         element: suspended(<AppLayout />),
         children: [
           { index: true, element: suspended(<DashboardPage />) },
+          { path: 'livestock', element: suspended(<LivestockPage />) },
           { path: 'twin', element: suspended(<TwinPage />) },
           { path: 'alerts', element: suspended(<AlertsPage />) },
           { path: 'automation', element: suspended(<AutomationPage />) },

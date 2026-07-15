@@ -4,6 +4,7 @@
     "tagline": "The digital twin for aquaponic farms",
     "nav": {
       "dashboard": "Dashboard",
+      "livestock": "Livestock",
       "twin": "Digital twin",
       "alerts": "Alerts",
       "automation": "Automation",
@@ -260,7 +261,7 @@
     "nodes": {
       "fish_tank": "Fish tank",
       "biofilter": "Biofilter",
-      "grow_beds": "Grow beds",
+      "grow_bed": "Grow beds",
       "sump": "Sump",
       "pump": "Pump"
     },
@@ -279,7 +280,8 @@
       "baseline": "Starting values",
       "run": "Run simulation",
       "running": "Running",
-      "reset": "Reset to defaults"
+      "reset": "Reset to defaults",
+      "stockBaseline": "Current stock: {{biomass}} kg, {{density}} kg/m³"
     },
     "disclaimer": "This is a projection on the twin. It changes nothing on the real farm.",
     "horizonOption": "{{days}} days",
@@ -296,7 +298,36 @@
     },
     "entersWarning": "Enters warning on day {{day}}",
     "entersCritical": "Enters critical on day {{day}}",
-    "allStable": "The system stays within safe ranges for the whole horizon"
+    "allStable": "The system stays within safe ranges for the whole horizon",
+    "layout": {
+      "tab": "Layout",
+      "connect": "Connect",
+      "connectHint": "Click a node, then another, to connect them",
+      "placeHint": "Click the canvas to place the node",
+      "editorHint": "Add a node from the palette, or select a node to edit it",
+      "capReached": "Node limit reached ({{max}})",
+      "hintSelfLoop": "A node cannot connect to itself",
+      "hintDuplicate": "That connection already exists",
+      "nodeDetails": "Node",
+      "edgeDetails": "Connection",
+      "label": "Label",
+      "prop": {
+        "volumeL": "Volume",
+        "areaM2": "Area",
+        "flowLph": "Flow rate"
+      },
+      "sensors": "Sensors",
+      "unassigned": "Unassigned",
+      "deleteNode": "Delete node",
+      "deleteNodeBody": "Deleting {{label}} also removes its connections and unassigns its sensors. This cannot be undone.",
+      "deleteEdge": "Delete connection",
+      "deleteEdgeBody": "This connection will be removed.",
+      "edgeFromTo": "{{from}} → {{to}}",
+      "selectHint": "Select a node or connection, or add one from the palette",
+      "cancel": "Cancel",
+      "confirmDelete": "Delete",
+      "saveFailed": "Could not save the change. Please try again"
+    }
   },
   "automation": {
     "title": "Automation",
@@ -412,5 +443,75 @@
     "typeToConfirm": "Type the farm name",
     "cancel": "Cancel",
     "farmDeleted": "Farm deleted"
+  },
+  "species": {
+    "tilapia": "Tilapia",
+    "trout": "Trout",
+    "sturgeon": "Sturgeon",
+    "carp": "Carp",
+    "catfish": "Catfish"
+  },
+  "livestock": {
+    "description": "Track your fish batches, growth and losses",
+    "newBatch": "New batch",
+    "loading": "Loading",
+    "totalLive": "Live fish",
+    "totalBiomass": "Biomass",
+    "survival": "Survival",
+    "feedToday": "Feed today",
+    "feedReducedHint": "Feed is halved for batches whose water temperature is outside the optimal range",
+    "profileSuggestion": "The {{species}} optimal range is {{min}} to {{max}} °C, which differs from the current water temperature thresholds",
+    "applyProfile": "Apply species temperature profile",
+    "dismiss": "Dismiss",
+    "profileApplied": "Temperature profile applied",
+    "emptyTitle": "No batches yet",
+    "emptyBody": "Add your first fish batch to start tracking",
+    "noTank": "No tank",
+    "noTankNotice": "Add a fish tank in the twin Layout tab before stocking fish",
+    "goToLayout": "Open the Layout editor",
+    "selectTank": "Select a tank",
+    "species": "Species",
+    "tank": "Tank",
+    "count": "Count",
+    "avgWeight": "Avg weight",
+    "avgWeightG": "Average weight g",
+    "biomass": "Biomass",
+    "density": "Density",
+    "basedOn": "Based on {{volume}} L",
+    "stockedAge": "Stocked {{date}}, {{days}} days ago",
+    "stockedAt": "Stocked date",
+    "note": "Note",
+    "logEvent": "Log event",
+    "eventType": "Event type",
+    "deleteBatch": "Delete batch",
+    "deleteBatchBody": "This batch and all of its events will be removed. This cannot be undone.",
+    "confirmDelete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "batchCreated": "Batch created",
+    "eventLogged": "Event logged",
+    "batchDeleted": "Batch deleted",
+    "saveFailed": "Something went wrong. Please try again",
+    "errors": {
+      "tank": "Select a tank",
+      "count": "Enter a valid count",
+      "weight": "Enter a valid weight",
+      "harvestTooMany": "Harvest cannot exceed the current count"
+    },
+    "type": {
+      "mortality": "Mortality",
+      "harvest": "Harvest",
+      "restock": "Restock",
+      "weighing": "Weighing"
+    },
+    "events": "Events",
+    "noEvents": "No events yet",
+    "event": {
+      "date": "Date",
+      "batch": "Batch",
+      "type": "Type",
+      "amount": "Amount",
+      "note": "Note"
+    }
   }
 }

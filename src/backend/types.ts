@@ -1,13 +1,23 @@
 import type { DeviceType, SensorType } from '@/shared/config/aquaponics'
+import type { Species } from '@/shared/config/species'
 
 // Narrowed domain unions shared across the app. SensorType and DeviceType are
 // re-exported from the domain config (their single source of truth).
 export type { DeviceType, SensorType }
+export type { Species }
+export type FishEventType = 'mortality' | 'harvest' | 'restock' | 'weighing'
 export type AlertKind = 'threshold' | 'prediction'
 export type AlertSeverity = 'warning' | 'critical'
 export type RuleCondition = 'above' | 'below'
 export type RuleAction = 'turn_on' | 'turn_off'
 export type TriggeredBy = 'rule' | 'manual'
+export type NodeType = 'fish_tank' | 'grow_bed' | 'biofilter' | 'sump' | 'pump'
+// jsonb props, loosely typed here; layout.ts narrows per node type.
+export type NodeProps = {
+  volumeL?: number
+  areaM2?: number
+  flowLph?: number
+}
 
 // Hand written Database interface matching supabase/schema.sql exactly.
 export interface Database {
@@ -44,6 +54,7 @@ export interface Database {
           warn_high: number | null
           crit_low: number | null
           crit_high: number | null
+          node_id: string | null
           created_at: string
         }
         Insert: {
@@ -55,6 +66,7 @@ export interface Database {
           warn_high?: number | null
           crit_low?: number | null
           crit_high?: number | null
+          node_id?: string | null
           created_at?: string
         }
         Update: {
@@ -66,6 +78,7 @@ export interface Database {
           warn_high?: number | null
           crit_low?: number | null
           crit_high?: number | null
+          node_id?: string | null
           created_at?: string
         }
         Relationships: []
@@ -226,6 +239,132 @@ export interface Database {
         }
         Relationships: []
       }
+      farm_nodes: {
+        Row: {
+          id: string
+          farm_id: string
+          type: NodeType
+          label: string
+          x: number
+          y: number
+          props: NodeProps
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          farm_id: string
+          type: NodeType
+          label: string
+          x: number
+          y: number
+          props?: NodeProps
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          farm_id?: string
+          type?: NodeType
+          label?: string
+          x?: number
+          y?: number
+          props?: NodeProps
+          created_at?: string
+        }
+        Relationships: []
+      }
+      farm_edges: {
+        Row: {
+          id: string
+          farm_id: string
+          source_node: string
+          target_node: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          farm_id: string
+          source_node: string
+          target_node: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          farm_id?: string
+          source_node?: string
+          target_node?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      fish_batches: {
+        Row: {
+          id: string
+          farm_id: string
+          node_id: string | null
+          species: Species
+          initial_count: number
+          avg_weight_g: number
+          stocked_at: string
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          farm_id: string
+          node_id?: string | null
+          species: Species
+          initial_count: number
+          avg_weight_g: number
+          stocked_at?: string
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          farm_id?: string
+          node_id?: string | null
+          species?: Species
+          initial_count?: number
+          avg_weight_g?: number
+          stocked_at?: string
+          note?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      fish_events: {
+        Row: {
+          id: number
+          batch_id: string
+          farm_id: string
+          type: FishEventType
+          count: number | null
+          avg_weight_g: number | null
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          batch_id: string
+          farm_id: string
+          type: FishEventType
+          count?: number | null
+          avg_weight_g?: number | null
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          batch_id?: string
+          farm_id?: string
+          type?: FishEventType
+          count?: number | null
+          avg_weight_g?: number | null
+          note?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -242,3 +381,7 @@ export type Device = Database['public']['Tables']['devices']['Row']
 export type Alert = Database['public']['Tables']['alerts']['Row']
 export type AutomationRule = Database['public']['Tables']['automation_rules']['Row']
 export type AutomationEvent = Database['public']['Tables']['automation_events']['Row']
+export type FarmNode = Database['public']['Tables']['farm_nodes']['Row']
+export type FarmEdge = Database['public']['Tables']['farm_edges']['Row']
+export type FishBatch = Database['public']['Tables']['fish_batches']['Row']
+export type FishEvent = Database['public']['Tables']['fish_events']['Row']

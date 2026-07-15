@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Sensor } from '@/backend'
-import { insertReadings, listSensors } from '@/backend'
+import { getLayout, insertReadings, listBatches, listEvents, listSensors } from '@/backend'
 import { useFarm } from '@/frontend/farm/FarmProvider'
 import {
   generateHistory as buildHistory,
@@ -13,6 +13,7 @@ import {
 } from '@/frontend/simulator/engine'
 import type { SensorType } from '@/shared/config/aquaponics'
 import { SENSOR_TYPE_LIST } from '@/shared/config/aquaponics'
+import { computeLoadFactor, totalBiomassKg } from '@/shared/lib/biomass'
 import { useToast } from '@/shared/ui'
 
 type Anomalies = Record<SensorType, boolean>
@@ -57,10 +58,38 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
   const listenersRef = useRef<Set<(readings: SimReading[]) => void>>(new Set())
   const intervalRef = useRef<number | null>(null)
   const tickFnRef = useRef<() => Promise<void>>(async () => {})
+  const loadFactorRef = useRef(1)
+  const farmIdRef = useRef<string | null>(activeFarmId)
+
+  useEffect(() => {
+    farmIdRef.current = activeFarmId
+  }, [activeFarmId])
 
   useEffect(() => {
     sensorsRef.current = sensors
   }, [sensors])
+
+  // Derive the fish load from the real stock and tank volumes, so a heavier stock
+  // drives ammonia up and oxygen down in the simulated stream.
+  const refreshLoadFactor = useCallback(async (farmId: string | null) => {
+    if (!farmId) {
+      loadFactorRef.current = 1
+      return
+    }
+    try {
+      const [layout, batches, events] = await Promise.all([
+        getLayout(farmId),
+        listBatches(farmId),
+        listEvents(farmId, 500),
+      ])
+      const totalVolumeL = layout.nodes
+        .filter((node) => node.type === 'fish_tank')
+        .reduce((sum, node) => sum + (node.props.volumeL ?? 0), 0)
+      loadFactorRef.current = computeLoadFactor(totalBiomassKg(batches, events), totalVolumeL)
+    } catch {
+      loadFactorRef.current = 1
+    }
+  }, [])
 
   useEffect(() => {
     anomaliesRef.current = anomalies
@@ -84,6 +113,7 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
       return
     }
     let active = true
+    void refreshLoadFactor(activeFarmId)
     listSensors(activeFarmId)
       .then((list) => {
         if (!active) return
@@ -98,7 +128,7 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false
     }
-  }, [activeFarmId, stop])
+  }, [activeFarmId, stop, refreshLoadFactor])
 
   // Keep the tick closure fresh so the interval always sees current deps.
   useEffect(() => {
@@ -108,7 +138,12 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
       const recorded_at = new Date().toISOString()
       const readings: SimReading[] = currentSensors.map((sensor) => {
         const current = valuesRef.current.get(sensor.id) ?? setpointFor(sensor.type)
-        const value = nextValue(sensor.type, current, anomaliesRef.current[sensor.type])
+        const value = nextValue(
+          sensor.type,
+          current,
+          anomaliesRef.current[sensor.type],
+          loadFactorRef.current,
+        )
         valuesRef.current.set(sensor.id, value)
         return { sensor_id: sensor.id, value, recorded_at }
       })
@@ -127,12 +162,13 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
 
   const start = useCallback(() => {
     if (intervalRef.current !== null) return
+    void refreshLoadFactor(farmIdRef.current)
     setRunning(true)
     void tickFnRef.current()
     intervalRef.current = window.setInterval(() => {
       void tickFnRef.current()
     }, TICK_MS)
-  }, [])
+  }, [refreshLoadFactor])
 
   useEffect(() => {
     return () => {
@@ -155,6 +191,9 @@ export function SimulatorProvider({ children }: { children: ReactNode }) {
       const rows = buildHistory(
         currentSensors.map((sensor) => ({ id: sensor.id, type: sensor.type })),
         Date.now(),
+        24,
+        5,
+        loadFactorRef.current,
       )
       await insertReadings(rows)
       toast(t('app.simulator.historyDone'))

@@ -96,10 +96,13 @@ export function runScenario(
   currentState: WaterState,
   scenario: Scenario,
   getThresholds: (type: SensorType) => Thresholds,
+  volumeFactor = 1,
+  baseLoadFactor = 1,
 ): ScenarioResult {
   const base = defaultParams()
   const params: ModelParams = {
-    fishLoad: base.fishLoad * scenario.fishLoad,
+    // The scenario multiplier applies on top of the farm's real stock load.
+    fishLoad: base.fishLoad * scenario.fishLoad * baseLoadFactor,
     feedRate: base.feedRate * scenario.feedRate,
     plantMass: base.plantMass * scenario.plantMass,
     aerationLevel: scenario.aerationLevel,
@@ -107,7 +110,7 @@ export function runScenario(
     waterTempSetpoint: base.waterTempSetpoint + scenario.waterTempDelta,
   }
 
-  const series = simulate(currentState, params, scenario.horizonDays)
+  const series = simulate(currentState, params, scenario.horizonDays, 1, volumeFactor)
   const analysis = SENSOR_TYPE_LIST.map((type) => analyzeSensor(type, series, getThresholds(type)))
   const overall = worstVerdict(analysis.map((item) => item.verdict))
   return { series, analysis, overall }

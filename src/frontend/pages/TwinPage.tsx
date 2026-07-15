@@ -3,12 +3,15 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Device } from '@/backend'
-import { listDevices, setDeviceState } from '@/backend'
+import type { Device, FishBatch, FishEvent } from '@/backend'
+import { listBatches, listDevices, listEvents, setDeviceState } from '@/backend'
+import { computeLoadFactor, totalBiomassKg } from '@/shared/lib/biomass'
 import { useLiveReadings } from '@/frontend/data/LiveReadingsProvider'
 import { useFarm } from '@/frontend/farm/FarmProvider'
+import { LayoutEditor } from '@/frontend/twin/LayoutEditor'
+import { LayoutProvider, useLayout } from '@/frontend/twin/LayoutProvider'
 import { Schematic } from '@/frontend/twin/Schematic'
-import type { SchematicNodeId } from '@/frontend/twin/Schematic'
+import { FALLBACK_SENSORS } from '@/frontend/twin/nodeConfig'
 import { baselineState } from '@/frontend/twin/model'
 import type { WaterState } from '@/frontend/twin/model'
 import { defaultScenario, runScenario } from '@/frontend/twin/scenario'
@@ -34,17 +37,9 @@ import {
   useToast,
 } from '@/shared/ui'
 
-type TabKey = 'schematic' | 'whatif'
+type TabKey = 'schematic' | 'whatif' | 'layout'
 
 const DAY_MS = 24 * 60 * 60 * 1000
-
-const NODE_SENSORS: Record<SchematicNodeId, SensorType[]> = {
-  fish_tank: ['dissolved_oxygen', 'water_temp', 'ph'],
-  biofilter: ['ammonia', 'nitrite'],
-  grow_beds: ['nitrate', 'ph'],
-  sump: [],
-  pump: [],
-}
 
 const VERDICT_STATUS: Record<Verdict, Status> = {
   stable: 'ok',
@@ -108,15 +103,26 @@ function RangeControl({
 }
 
 export default function TwinPage() {
+  return (
+    <LayoutProvider>
+      <TwinPageContent />
+    </LayoutProvider>
+  )
+}
+
+function TwinPageContent() {
   const { t } = useTranslation()
   usePageTitle(`${t('app.nav.twin')} · ${t('app.name')}`)
   const { activeFarmId } = useFarm()
-  const { latest, getThresholds } = useLiveReadings()
+  const { latest, getThresholds, sensors } = useLiveReadings()
+  const { nodes } = useLayout()
   const { toast } = useToast()
 
   const [tab, setTab] = useState<TabKey>('schematic')
   const [devices, setDevices] = useState<Device[]>([])
-  const [selected, setSelected] = useState<SchematicNodeId | null>(null)
+  const [batches, setBatches] = useState<FishBatch[]>([])
+  const [events, setEvents] = useState<FishEvent[]>([])
+  const [selected, setSelected] = useState<string | null>(null)
   const [pendingDeviceId, setPendingDeviceId] = useState<string | null>(null)
   const [scenario, setScenario] = useState<Scenario>(defaultScenario)
   const [result, setResult] = useState<ScenarioResult | null>(null)
@@ -125,12 +131,22 @@ export default function TwinPage() {
   useEffect(() => {
     if (!activeFarmId) return
     let live = true
-    listDevices(activeFarmId)
-      .then((list) => {
-        if (live) setDevices(list)
+    Promise.all([
+      listDevices(activeFarmId),
+      listBatches(activeFarmId),
+      listEvents(activeFarmId, 1000),
+    ])
+      .then(([deviceList, batchList, eventList]) => {
+        if (!live) return
+        setDevices(deviceList)
+        setBatches(batchList)
+        setEvents(eventList)
       })
       .catch(() => {
-        if (live) setDevices([])
+        if (!live) return
+        setDevices([])
+        setBatches([])
+        setEvents([])
       })
     return () => {
       live = false
@@ -138,6 +154,24 @@ export default function TwinPage() {
   }, [activeFarmId])
 
   const current = useMemo(() => buildCurrentState(latest), [latest])
+
+  const totalTankVolumeL = useMemo(
+    () =>
+      nodes.filter((node) => node.type === 'fish_tank').reduce((sum, node) => sum + (node.props.volumeL ?? 0), 0),
+    [nodes],
+  )
+
+  const volumeFactor = useMemo(
+    () => (totalTankVolumeL > 0 ? Math.min(3, Math.max(0.5, totalTankVolumeL / 1000)) : 1),
+    [totalTankVolumeL],
+  )
+
+  const stock = useMemo(() => {
+    const biomass = totalBiomassKg(batches, events)
+    const density = totalTankVolumeL > 0 ? biomass / (totalTankVolumeL / 1000) : 0
+    const loadFactor = computeLoadFactor(biomass, totalTankVolumeL)
+    return { biomass, density, loadFactor }
+  }, [batches, events, totalTankVolumeL])
 
   async function toggleDevice(device: Device, next: boolean) {
     setPendingDeviceId(device.id)
@@ -164,8 +198,10 @@ export default function TwinPage() {
     setRunning(true)
     const startState = buildCurrentState(latest)
     const snapshot = scenario
+    const factor = volumeFactor
+    const baseLoad = stock.loadFactor
     window.setTimeout(() => {
-      setResult(runScenario(startState, snapshot, getThresholds))
+      setResult(runScenario(startState, snapshot, getThresholds, factor, baseLoad))
       setRunning(false)
     }, 60)
   }
@@ -176,6 +212,13 @@ export default function TwinPage() {
   }
 
   const pumpDevice = devices.find((device) => device.type === 'main_pump')
+  const selectedNode = selected ? nodes.find((node) => node.id === selected) ?? null : null
+  const detailSensors = selectedNode
+    ? (() => {
+        const assigned = sensors.filter((sensor) => sensor.node_id === selectedNode.id)
+        return assigned.length > 0 ? assigned.map((s) => s.type) : FALLBACK_SENSORS[selectedNode.type]
+      })()
+    : []
 
   return (
     <div className="flex flex-col gap-8">
@@ -186,6 +229,7 @@ export default function TwinPage() {
         items={[
           { value: 'schematic', label: t('twin.tabs.schematic') },
           { value: 'whatif', label: t('twin.tabs.whatif') },
+          { value: 'layout', label: t('twin.layout.tab') },
         ]}
         value={tab}
         onChange={(value) => setTab(value as TabKey)}
@@ -198,11 +242,11 @@ export default function TwinPage() {
           </Card>
 
           <Card>
-            <CardHeader title={selected ? t(`twin.nodes.${selected}`) : t('twin.details')} />
+            <CardHeader title={selectedNode ? selectedNode.label : t('twin.details')} />
             <CardContent>
-              {!selected ? (
+              {!selectedNode ? (
                 <p className="text-[13px] text-muted">{t('twin.selectHint')}</p>
-              ) : selected === 'pump' ? (
+              ) : selectedNode.type === 'pump' ? (
                 pumpDevice ? (
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-foreground">{t('devices.main_pump')}</span>
@@ -216,11 +260,11 @@ export default function TwinPage() {
                 ) : (
                   <p className="text-[13px] text-muted">{t('twin.noSensors')}</p>
                 )
-              ) : NODE_SENSORS[selected].length === 0 ? (
+              ) : detailSensors.length === 0 ? (
                 <p className="text-[13px] text-muted">{t('twin.noSensors')}</p>
               ) : (
                 <div className="flex flex-col gap-4">
-                  {NODE_SENSORS[selected].map((type) => {
+                  {detailSensors.map((type) => {
                     const config = SENSOR_TYPES[type]
                     const value = latest.get(type)
                     const status = value !== undefined ? computeStatus(value, getThresholds(type)) : null
@@ -242,6 +286,8 @@ export default function TwinPage() {
             </CardContent>
           </Card>
         </div>
+      ) : tab === 'layout' ? (
+        <LayoutEditor />
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Card className="lg:col-span-1">
@@ -272,15 +318,23 @@ export default function TwinPage() {
                 display={`${scenario.waterTempDelta >= 0 ? '+' : ''}${scenario.waterTempDelta.toFixed(1)} °C`}
                 onChange={(value) => updateScenario({ waterTempDelta: value })}
               />
-              <RangeControl
-                label={t('twin.controls.fishLoad')}
-                value={scenario.fishLoad}
-                min={0.5}
-                max={2}
-                step={0.1}
-                display={`×${scenario.fishLoad.toFixed(1)}`}
-                onChange={(value) => updateScenario({ fishLoad: value })}
-              />
+              <div className="flex flex-col gap-1">
+                <RangeControl
+                  label={t('twin.controls.fishLoad')}
+                  value={scenario.fishLoad}
+                  min={0.5}
+                  max={2}
+                  step={0.1}
+                  display={`×${scenario.fishLoad.toFixed(1)}`}
+                  onChange={(value) => updateScenario({ fishLoad: value })}
+                />
+                <p className="font-mono text-[11px] text-muted">
+                  {t('twin.controls.stockBaseline', {
+                    biomass: stock.biomass.toFixed(1),
+                    density: stock.density.toFixed(1),
+                  })}
+                </p>
+              </div>
               <RangeControl
                 label={t('twin.controls.feedRate')}
                 value={scenario.feedRate}
@@ -319,11 +373,7 @@ export default function TwinPage() {
               />
 
               <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => updateScenario({ waterTempDelta: 4 })}
-                >
+                <Button variant="ghost" size="sm" onClick={() => updateScenario({ waterTempDelta: 4 })}>
                   {t('twin.presets.heatwave')}
                 </Button>
                 <Button

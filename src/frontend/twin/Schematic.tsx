@@ -2,52 +2,29 @@ import { useId } from 'react'
 import type { KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Device } from '@/backend'
+import type { Device, FarmNode, Sensor } from '@/backend'
 import { useLiveReadings } from '@/frontend/data/LiveReadingsProvider'
+import { useLayout } from '@/frontend/twin/LayoutProvider'
+import {
+  CANVAS_H,
+  CANVAS_W,
+  FALLBACK_SENSORS,
+  FALLBACK_VALUE_SENSOR,
+  NODE_H,
+  NODE_W,
+} from '@/frontend/twin/nodeConfig'
 import type { SensorType, Thresholds } from '@/shared/config/aquaponics'
 import { SENSOR_TYPES } from '@/shared/config/aquaponics'
 import { computeStatus } from '@/shared/lib/status'
 import type { Status } from '@/shared/lib/status'
 
-export type SchematicNodeId = 'fish_tank' | 'biofilter' | 'grow_beds' | 'sump' | 'pump'
-
 type NodeStatus = Status | 'neutral'
-
-type NodeDef = {
-  id: SchematicNodeId
-  x: number
-  y: number
-  w: number
-  h: number
-  statusSensors: SensorType[]
-  valueSensor: SensorType | null
-}
-
-const NODES: NodeDef[] = [
-  { id: 'fish_tank', x: 40, y: 40, w: 110, h: 60, statusSensors: ['dissolved_oxygen', 'water_temp', 'ph'], valueSensor: 'dissolved_oxygen' },
-  { id: 'pump', x: 45, y: 130, w: 100, h: 40, statusSensors: [], valueSensor: null },
-  { id: 'sump', x: 40, y: 200, w: 110, h: 60, statusSensors: [], valueSensor: null },
-  { id: 'biofilter', x: 250, y: 40, w: 110, h: 60, statusSensors: ['ammonia', 'nitrite'], valueSensor: 'ammonia' },
-  { id: 'grow_beds', x: 250, y: 200, w: 110, h: 60, statusSensors: ['nitrate', 'ph'], valueSensor: 'nitrate' },
-]
-
-const EDGES = [
-  { x1: 150, y1: 70, x2: 250, y2: 70 },
-  { x1: 305, y1: 100, x2: 305, y2: 200 },
-  { x1: 250, y1: 230, x2: 150, y2: 230 },
-  { x1: 95, y1: 200, x2: 95, y2: 170 },
-  { x1: 95, y1: 130, x2: 95, y2: 100 },
-]
 
 function rank(status: Status): number {
   return status === 'critical' ? 2 : status === 'warning' ? 1 : 0
 }
 
-function worstStatus(
-  types: SensorType[],
-  latest: Map<SensorType, number>,
-  getThresholds: (type: SensorType) => Thresholds,
-): NodeStatus {
+function worstOf(types: SensorType[], latest: Map<SensorType, number>, getThresholds: (t: SensorType) => Thresholds): NodeStatus {
   let worst: Status | null = null
   for (const type of types) {
     const value = latest.get(type)
@@ -56,6 +33,13 @@ function worstStatus(
     if (worst === null || rank(status) > rank(worst)) worst = status
   }
   return worst ?? 'neutral'
+}
+
+function formatSensorValue(type: SensorType, latest: Map<SensorType, number>): string {
+  const value = latest.get(type)
+  if (value === undefined) return '—'
+  const config = SENSOR_TYPES[type]
+  return `${value.toFixed(config.decimals)} ${config.unit}`
 }
 
 function nodeFill(status: NodeStatus): string {
@@ -70,36 +54,45 @@ function nodeTextColor(status: NodeStatus): string {
   return 'var(--color-foreground)'
 }
 
+function boundaryPoint(cx: number, cy: number, dx: number, dy: number): { x: number; y: number } {
+  if (dx === 0 && dy === 0) return { x: cx, y: cy }
+  const scaleX = dx !== 0 ? NODE_W / 2 / Math.abs(dx) : Number.POSITIVE_INFINITY
+  const scaleY = dy !== 0 ? NODE_H / 2 / Math.abs(dy) : Number.POSITIVE_INFINITY
+  const scale = Math.min(scaleX, scaleY)
+  return { x: cx + dx * scale, y: cy + dy * scale }
+}
+
 export type SchematicProps = {
   devices: Device[]
-  selected: SchematicNodeId | null
-  onSelect: (id: SchematicNodeId) => void
+  selected: string | null
+  onSelect: (id: string) => void
 }
 
 export function Schematic({ devices, selected, onSelect }: SchematicProps) {
   const { t } = useTranslation()
-  const { latest, getThresholds } = useLiveReadings()
+  const { nodes, edges } = useLayout()
+  const { latest, getThresholds, sensors } = useLiveReadings()
   const arrowId = useId()
 
-  const pump = devices.find((device) => device.type === 'main_pump')
-  const pumpOn = pump?.is_on ?? false
+  const pumpOn = devices.find((device) => device.type === 'main_pump')?.is_on ?? false
+  const nodeById = new Map(nodes.map((node) => [node.id, node]))
 
-  function statusFor(node: NodeDef): NodeStatus {
-    if (node.id === 'pump') return pumpOn ? 'ok' : 'warning'
-    if (node.id === 'sump') return 'neutral'
-    return worstStatus(node.statusSensors, latest, getThresholds)
+  function statusAndValue(node: FarmNode): { status: NodeStatus; value: string | null } {
+    if (node.type === 'pump') {
+      return { status: pumpOn ? 'ok' : 'warning', value: pumpOn ? t('app.overview.on') : t('app.overview.off') }
+    }
+    const assigned = sensors.filter((sensor: Sensor) => sensor.node_id === node.id)
+    if (assigned.length > 0) {
+      const status = worstOf(assigned.map((s) => s.type), latest, getThresholds)
+      return { status, value: formatSensorValue(assigned[0].type, latest) }
+    }
+    if (node.type === 'sump') return { status: 'neutral', value: null }
+    const status = worstOf(FALLBACK_SENSORS[node.type], latest, getThresholds)
+    const valueSensor = FALLBACK_VALUE_SENSOR[node.type]
+    return { status, value: valueSensor ? formatSensorValue(valueSensor, latest) : null }
   }
 
-  function valueFor(node: NodeDef): string | null {
-    if (node.id === 'pump') return pumpOn ? t('app.overview.on') : t('app.overview.off')
-    if (!node.valueSensor) return null
-    const value = latest.get(node.valueSensor)
-    if (value === undefined) return '—'
-    const config = SENSOR_TYPES[node.valueSensor]
-    return `${value.toFixed(config.decimals)} ${config.unit}`
-  }
-
-  function handleKeyDown(event: KeyboardEvent<SVGGElement>, id: SchematicNodeId) {
+  function handleKeyDown(event: KeyboardEvent<SVGGElement>, id: string) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       onSelect(id)
@@ -107,57 +100,64 @@ export function Schematic({ devices, selected, onSelect }: SchematicProps) {
   }
 
   return (
-    <svg viewBox="0 0 400 300" className="h-auto w-full" role="group" aria-label={t('twin.tabs.schematic')}>
+    <svg
+      viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+      className="h-auto w-full"
+      role="group"
+      aria-label={t('twin.tabs.schematic')}
+    >
       <defs>
-        <marker
-          id={arrowId}
-          viewBox="0 0 6 6"
-          refX="5"
-          refY="3"
-          markerWidth="5"
-          markerHeight="5"
-          orient="auto"
-        >
+        <marker id={arrowId} viewBox="0 0 6 6" refX="5" refY="3" markerWidth="5" markerHeight="5" orient="auto">
           <path d="M0,0 L6,3 L0,6 z" fill="var(--color-foreground)" />
         </marker>
       </defs>
 
-      {EDGES.map((edge, index) => (
-        <g key={`edge-${index}`}>
-          <line
-            x1={edge.x1}
-            y1={edge.y1}
-            x2={edge.x2}
-            y2={edge.y2}
-            stroke="var(--color-border)"
-            strokeWidth={1.5}
-            markerEnd={`url(#${arrowId})`}
-          />
-          <line
-            x1={edge.x1}
-            y1={edge.y1}
-            x2={edge.x2}
-            y2={edge.y2}
-            stroke="var(--color-foreground)"
-            strokeWidth={1.5}
-            strokeDasharray="4 8"
-            className={pumpOn ? 'twin-pipe-flow' : undefined}
-          />
-        </g>
-      ))}
+      {edges.map((edge) => {
+        const source = nodeById.get(edge.source_node)
+        const target = nodeById.get(edge.target_node)
+        if (!source || !target) return null
+        const sc = { x: source.x + NODE_W / 2, y: source.y + NODE_H / 2 }
+        const tc = { x: target.x + NODE_W / 2, y: target.y + NODE_H / 2 }
+        const dx = tc.x - sc.x
+        const dy = tc.y - sc.y
+        const start = boundaryPoint(sc.x, sc.y, dx, dy)
+        const end = boundaryPoint(tc.x, tc.y, -dx, -dy)
+        return (
+          <g key={edge.id}>
+            <line
+              x1={start.x}
+              y1={start.y}
+              x2={end.x}
+              y2={end.y}
+              stroke="var(--color-border)"
+              strokeWidth={1.5}
+              markerEnd={`url(#${arrowId})`}
+            />
+            <line
+              x1={start.x}
+              y1={start.y}
+              x2={end.x}
+              y2={end.y}
+              stroke="var(--color-foreground)"
+              strokeWidth={1.5}
+              strokeDasharray="4 8"
+              className={pumpOn ? 'twin-pipe-flow' : undefined}
+            />
+          </g>
+        )
+      })}
 
-      {NODES.map((node) => {
-        const status = statusFor(node)
-        const value = valueFor(node)
-        const cx = node.x + node.w / 2
-        const cy = node.y + node.h / 2
+      {nodes.map((node) => {
+        const { status, value } = statusAndValue(node)
+        const cx = node.x + NODE_W / 2
+        const cy = node.y + NODE_H / 2
         const isSelected = selected === node.id
         return (
           <g
             key={node.id}
             role="button"
             tabIndex={0}
-            aria-label={t(`twin.nodes.${node.id}`)}
+            aria-label={node.label}
             aria-pressed={isSelected}
             onClick={() => onSelect(node.id)}
             onKeyDown={(event) => handleKeyDown(event, node.id)}
@@ -167,8 +167,8 @@ export function Schematic({ devices, selected, onSelect }: SchematicProps) {
               <rect
                 x={node.x - 3}
                 y={node.y - 3}
-                width={node.w + 6}
-                height={node.h + 6}
+                width={NODE_W + 6}
+                height={NODE_H + 6}
                 rx={2}
                 fill="none"
                 stroke="var(--color-foreground)"
@@ -178,31 +178,18 @@ export function Schematic({ devices, selected, onSelect }: SchematicProps) {
             <rect
               x={node.x}
               y={node.y}
-              width={node.w}
-              height={node.h}
+              width={NODE_W}
+              height={NODE_H}
               rx={2}
               fill={nodeFill(status)}
               stroke="var(--color-border)"
               strokeWidth={1}
             />
-            <text
-              x={cx}
-              y={value ? cy - 3 : cy + 4}
-              textAnchor="middle"
-              fontSize={12}
-              fill={nodeTextColor(status)}
-            >
-              {t(`twin.nodes.${node.id}`)}
+            <text x={cx} y={value ? cy - 3 : cy + 4} textAnchor="middle" fontSize={12} fill={nodeTextColor(status)}>
+              {node.label}
             </text>
             {value ? (
-              <text
-                x={cx}
-                y={cy + 13}
-                textAnchor="middle"
-                fontSize={11}
-                className="font-mono"
-                fill={nodeTextColor(status)}
-              >
+              <text x={cx} y={cy + 13} textAnchor="middle" fontSize={11} className="font-mono" fill={nodeTextColor(status)}>
                 {value}
               </text>
             ) : null}
